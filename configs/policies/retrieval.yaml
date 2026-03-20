@@ -1,0 +1,7 @@
+weights:
+  relevance: 1.0
+  recency: 1.0
+  importance: 1.0
+summary_bonus: 1.4
+child_bonus: 1.2
+

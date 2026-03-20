@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project B Inspector</title>
+    <link rel="stylesheet" href="/ui/assets/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Project B</p>
+          <h1>Hierarchical Memory Inspector</h1>
+          <p class="hero-copy">
+            Inspect timelines, provenance chains, retrieval traces, model traces, and eval outcomes for the flat baseline and the
+            hierarchical memory stack.
+          </p>
+        </div>
+        <form id="agent-form" class="agent-form">
+          <label for="agent-id">Agent ID</label>
+          <input id="agent-id" name="agent-id" type="text" value="benchmark-agent-delayed-commitment" />
+          <button type="submit">Load agent</button>
+        </form>
+      </header>
+
+      <main class="dashboard">
+        <section class="panel panel-timeline">
+          <div class="panel-header">
+            <h2>Timeline</h2>
+            <button id="refresh-timeline" type="button">Refresh</button>
+          </div>
+          <div id="timeline" class="timeline"></div>
+        </section>
+
+        <section class="panel panel-center">
+          <div class="panel-header">
+            <h2>Inspector</h2>
+          </div>
+          <div id="node-detail" class="node-detail empty-state">Select a timeline item to inspect provenance and children.</div>
+          <div class="tree-section">
+            <div class="panel-subheader">
+              <h3>Tree</h3>
+            </div>
+            <div id="tree-view" class="tree-view"></div>
+          </div>
+        </section>
+
+        <section class="panel panel-side">
+          <div class="panel-header">
+            <h2>Retrieval Lab</h2>
+          </div>
+          <form id="retrieve-form" class="retrieve-form">
+            <label for="query">Query</label>
+            <textarea id="query" name="query" rows="3">What did I promise Maria to bring for the Simile AI demo?</textarea>
+            <label for="mode">Mode</label>
+            <select id="mode" name="mode">
+              <option value="balanced">balanced</option>
+              <option value="summary_only">summary_only</option>
+              <option value="drill_down">drill_down</option>
+            </select>
+            <label for="token-budget">Token budget</label>
+            <input id="token-budget" name="token-budget" type="number" value="120" />
+            <button type="submit">Run retrieval</button>
+          </form>
+          <div id="retrieval-result" class="retrieval-result empty-state">Run a retrieval to inspect packed context and branch choices.</div>
+        </section>
+      </main>
+
+      <section class="lower-grid">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Retrieval Traces</h2>
+          </div>
+          <div id="retrieval-traces" class="trace-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Model Traces</h2>
+          </div>
+          <div id="model-traces" class="trace-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Eval Runs</h2>
+            <button id="run-evals" type="button">Run evals</button>
+          </div>
+          <div id="eval-runs" class="eval-list"></div>
+        </section>
+      </section>
+    </div>
+
+    <script src="/ui/assets/app.js" type="module"></script>
+  </body>
+</html>

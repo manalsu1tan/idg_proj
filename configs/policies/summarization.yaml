@@ -1,0 +1,5 @@
+time_window_hours: 6
+cluster_similarity_threshold: 0.18
+summary_policy_id: rolling-window-v1
+max_summary_length: 600
+
