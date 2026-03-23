@@ -20,8 +20,8 @@ services:
     working_dir: /workspace
     command: sh -lc "pip install -e . && alembic upgrade head && uvicorn apps.api.main:app --host 0.0.0.0 --port 8000"
     environment:
-      PROJECT_B_DATABASE_URL: postgresql+psycopg://project_b:project_b@postgres:5432/project_b
-      PROJECT_B_AUTO_CREATE_SCHEMA: "false"
+      PROJECT_DATABASE_URL: postgresql+psycopg://project_b:project_b@postgres:5432/project_b
+      PROJECT_AUTO_CREATE_SCHEMA: "false"
     ports:
       - "8000:8000"
     volumes:

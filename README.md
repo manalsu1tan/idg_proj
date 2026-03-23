@@ -1,4 +1,4 @@
-# Project B: Hierarchical Memory for Generative Agents
+# Hierarchical Memory for Generative Agents
 
 This repository implements a research-first memory systems stack for generative agents. It preserves the dissertation-style `observe -> retrieve -> plan/react/reflect -> write back` loop while replacing the flat memory stream with a traceable L0/L1 hierarchy.
 
@@ -44,31 +44,42 @@ This seeds:
 
 - `benchmark-agent-delayed-commitment`
 - `benchmark-agent-routine-interruption`
+- `benchmark-agent-relationship-context`
+- `benchmark-agent-commitment-revision`
+- `benchmark-agent-identity-shift`
+
+To export a benchmark report from stored eval runs, use [`export_benchmark_report.sh`](/Users/Manal/Documents/GitHub/idg_proj/scripts/export_benchmark_report.sh):
+
+```bash
+./scripts/export_benchmark_report.sh
+```
+
+This writes both JSON and Markdown artifacts under [`reports/`](/Users/Manal/Documents/GitHub/idg_proj/reports).
 
 ## Real model provider
 
 The repository now targets a real OpenAI-compatible endpoint by default in `.env.example`.
 
-- `PROJECT_B_MODEL_PROVIDER=openai_compatible`
-- `PROJECT_B_MODEL_BASE_URL=https://api.openai.com/v1`
-- `PROJECT_B_MODEL_API_KEY=...`
+- `PROJECT_MODEL_PROVIDER=openai_compatible`
+- `PROJECT_MODEL_BASE_URL=https://api.openai.com/v1`
+- `PROJECT_MODEL_API_KEY=...`
 
-The structured summarizer and verifier use the Responses API with JSON Schema constrained outputs. For isolated tests or offline work, set `PROJECT_B_MODEL_PROVIDER=mock`.
+The structured summarizer and verifier use the Responses API with JSON Schema constrained outputs. For isolated tests or offline work, set `PROJECT_MODEL_PROVIDER=mock`.
 
 Example local `.env`:
 
 ```env
-PROJECT_B_MODEL_PROVIDER=openai_compatible
-PROJECT_B_MODEL_BASE_URL=https://api.openai.com/v1
-PROJECT_B_MODEL_API_KEY=your_key_here
-PROJECT_B_DATABASE_URL=postgresql+psycopg://project_b:project_b@localhost:5432/project_b
-PROJECT_B_AUTO_CREATE_SCHEMA=false
+PROJECT_MODEL_PROVIDER=openai_compatible
+PROJECT_MODEL_BASE_URL=https://api.openai.com/v1
+PROJECT_MODEL_API_KEY=your_key_here
+PROJECT_DATABASE_URL=postgresql+psycopg://project_b:project_b@localhost:5432/project_b
+PROJECT_AUTO_CREATE_SCHEMA=false
 ```
 
 ## Database and migrations
 
-- Local fallback: `PROJECT_B_DATABASE_URL=sqlite+pysqlite:///./project_b.db`
-- Production target: `PROJECT_B_DATABASE_URL=postgresql+psycopg://project_b:project_b@localhost:5432/project_b`
+- Local fallback: `PROJECT_DATABASE_URL=sqlite+pysqlite:///./project_b.db`
+- Production target: `PROJECT_DATABASE_URL=postgresql+psycopg://project_b:project_b@localhost:5432/project_b`
 - Migration entrypoint: [`alembic.ini`](/Users/Manal/Documents/GitHub/idg_proj/alembic.ini)
 - Initial schema migration: [`20250317_000001_initial_schema.py`](/Users/Manal/Documents/GitHub/idg_proj/alembic/versions/20250317_000001_initial_schema.py)
 

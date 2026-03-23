@@ -21,7 +21,7 @@ def build_model_client(settings: Settings) -> tuple[ModelClient, ModelProvider]:
     if settings.model_provider == ModelProvider.OPENAI_COMPATIBLE.value:
         if not settings.model_api_key:
             print(
-                "PROJECT_B_MODEL_API_KEY is not set; falling back to mock model client.",
+                "PROJECT_MODEL_API_KEY is not set; falling back to mock model client.",
                 file=sys.stderr,
             )
             return MockModelClient(), ModelProvider.MOCK

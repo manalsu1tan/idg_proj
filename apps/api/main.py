@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from apps.api.dependencies import get_service
+from packages.evals.report import build_report_payload, render_markdown_report
 from packages.evals.runner import run_all
 from packages.memory_core.services import MemoryService
 from packages.schemas.models import (
@@ -23,7 +24,7 @@ from packages.schemas.models import (
     TimelineResponse,
 )
 
-app = FastAPI(title="Project B Memory Tree", version="0.1.0")
+app = FastAPI(title="Memory Tree", version="0.1.0")
 UI_DIR = Path(__file__).resolve().parents[1] / "ui" / "static"
 if UI_DIR.exists():
     app.mount("/ui/assets", StaticFiles(directory=UI_DIR), name="ui-assets")
@@ -90,6 +91,17 @@ def run_evals(_: EvalRequest, service: MemoryService = Depends(get_service)) -> 
 @app.get("/v1/evals/runs")
 def list_eval_runs(service: MemoryService = Depends(get_service)):
     return service.eval_runs()
+
+
+@app.get("/v1/evals/report")
+def get_eval_report(service: MemoryService = Depends(get_service)):
+    return build_report_payload(service.eval_runs())
+
+
+@app.get("/v1/evals/report.md")
+def get_eval_report_markdown(service: MemoryService = Depends(get_service)) -> PlainTextResponse:
+    report = build_report_payload(service.eval_runs())
+    return PlainTextResponse(render_markdown_report(report), media_type="text/markdown")
 
 
 @app.get("/v1/nodes/{node_id}")

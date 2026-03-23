@@ -51,7 +51,7 @@ $COMPOSE_CMD -f infra/docker-compose.yml up -d postgres redis
 
 echo "Waiting for Postgres readiness..."
 for _ in {1..30}; do
-  if $COMPOSE_CMD -f infra/docker-compose.yml exec -T postgres pg_isready -U project_b -d project_b >/dev/null 2>&1; then
+  if $COMPOSE_CMD -f infra/docker-compose.yml exec -T postgres pg_isready -U project_b -d project_b  >/dev/null 2>&1; then
     break
   fi
   sleep 2
@@ -62,8 +62,8 @@ if ! $COMPOSE_CMD -f infra/docker-compose.yml exec -T postgres pg_isready -U pro
   exit 1
 fi
 
-export PROJECT_B_DATABASE_URL="postgresql+psycopg://project_b:project_b@localhost:5432/project_b"
-export PROJECT_B_AUTO_CREATE_SCHEMA="false"
+export PROJECT_DATABASE_URL="postgresql+psycopg://project_b:project_b@localhost:5432/project_b"
+export PROJECT_AUTO_CREATE_SCHEMA="false"
 
 echo "Running Alembic migrations against Postgres..."
 uv run alembic upgrade head
@@ -78,7 +78,7 @@ $COMPOSE_CMD -f infra/docker-compose.yml exec -T postgres psql -U project_b -d p
 
 echo
 echo "Postgres migration validation succeeded."
-echo "Database URL: $PROJECT_B_DATABASE_URL"
+echo "Database URL: $PROJECT_DATABASE_URL"
 
 if [[ "$START_API" -eq 1 ]]; then
   echo "Starting API with Postgres configuration..."

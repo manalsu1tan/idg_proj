@@ -1,0 +1,183 @@
+{
+  "exported_at": "2026-03-23T07:47:06.799022+00:00",
+  "report_type": "benchmark_eval_report",
+  "source": "stored_eval_runs",
+  "summary": {
+    "scenario_count": 5,
+    "hierarchy_recall_win_count": 3,
+    "recall_tie_count": 2,
+    "baseline_avg_keyword_recall": 0.7333333333333333,
+    "hierarchy_avg_keyword_recall": 0.95,
+    "avg_keyword_recall_gain": 0.2166666666666667,
+    "baseline_avg_retrieved_tokens": 13.4,
+    "hierarchy_avg_retrieved_tokens": 35.4,
+    "avg_retrieved_token_delta": -22.0
+  },
+  "scenarios": [
+    {
+      "scenario_name": "delayed_commitment",
+      "created_at": "2026-03-23T07:18:07.484670",
+      "notes": [
+        "Long-horizon recall after many irrelevant routines."
+      ],
+      "baseline": {
+        "keyword_recall": 0.75,
+        "retrieval_depth": 1.0,
+        "token_budget": 120.0,
+        "retrieved_token_count": 15.0,
+        "retrieved_node_count": 1.0,
+        "fallback_used": 0.0
+      },
+      "hierarchy": {
+        "keyword_recall": 1.0,
+        "retrieval_depth": 2.0,
+        "token_budget": 120.0,
+        "summary_count": 1.0,
+        "retrieved_token_count": 33.0,
+        "retrieved_node_count": 2.0,
+        "summary_node_count": 1.0,
+        "supporting_leaf_count": 1.0,
+        "branch_count": 1.0,
+        "fallback_used": 0.0,
+        "token_efficiency_gain": -18.0
+      },
+      "deltas": {
+        "keyword_recall_gain": 0.25,
+        "retrieved_token_count_delta": -18.0,
+        "retrieval_depth_delta": 1.0
+      }
+    },
+    {
+      "scenario_name": "routine_interruption",
+      "created_at": "2026-03-23T07:18:07.535513",
+      "notes": [
+        "Rare pivotal event should survive routine repetition."
+      ],
+      "baseline": {
+        "keyword_recall": 1.0,
+        "retrieval_depth": 1.0,
+        "token_budget": 120.0,
+        "retrieved_token_count": 16.0,
+        "retrieved_node_count": 1.0,
+        "fallback_used": 0.0
+      },
+      "hierarchy": {
+        "keyword_recall": 1.0,
+        "retrieval_depth": 1.0,
+        "token_budget": 120.0,
+        "summary_count": 0.0,
+        "retrieved_token_count": 28.0,
+        "retrieved_node_count": 3.0,
+        "summary_node_count": 0.0,
+        "supporting_leaf_count": 0.0,
+        "branch_count": 0.0,
+        "fallback_used": 1.0,
+        "token_efficiency_gain": -12.0
+      },
+      "deltas": {
+        "keyword_recall_gain": 0.0,
+        "retrieved_token_count_delta": -12.0,
+        "retrieval_depth_delta": 0.0
+      }
+    },
+    {
+      "scenario_name": "relationship_context",
+      "created_at": "2026-03-23T07:18:39.252375",
+      "notes": [
+        "Relationship context should remain recoverable as actionable guidance."
+      ],
+      "baseline": {
+        "keyword_recall": 0.5,
+        "retrieval_depth": 1.0,
+        "token_budget": 120.0,
+        "retrieved_token_count": 13.0,
+        "retrieved_node_count": 1.0,
+        "fallback_used": 0.0
+      },
+      "hierarchy": {
+        "keyword_recall": 1.0,
+        "retrieval_depth": 2.0,
+        "token_budget": 120.0,
+        "summary_count": 1.0,
+        "retrieved_token_count": 44.0,
+        "retrieved_node_count": 2.0,
+        "summary_node_count": 1.0,
+        "supporting_leaf_count": 1.0,
+        "branch_count": 1.0,
+        "fallback_used": 0.0,
+        "token_efficiency_gain": -31.0
+      },
+      "deltas": {
+        "keyword_recall_gain": 0.5,
+        "retrieved_token_count_delta": -31.0,
+        "retrieval_depth_delta": 1.0
+      }
+    },
+    {
+      "scenario_name": "commitment_revision",
+      "created_at": "2026-03-23T07:18:39.306489",
+      "notes": [
+        "Later corrective evidence should dominate outdated commitments."
+      ],
+      "baseline": {
+        "keyword_recall": 0.6666666666666666,
+        "retrieval_depth": 1.0,
+        "token_budget": 120.0,
+        "retrieved_token_count": 12.0,
+        "retrieved_node_count": 1.0,
+        "fallback_used": 0.0
+      },
+      "hierarchy": {
+        "keyword_recall": 1.0,
+        "retrieval_depth": 1.0,
+        "token_budget": 120.0,
+        "summary_count": 0.0,
+        "retrieved_token_count": 30.0,
+        "retrieved_node_count": 3.0,
+        "summary_node_count": 0.0,
+        "supporting_leaf_count": 0.0,
+        "branch_count": 0.0,
+        "fallback_used": 1.0,
+        "token_efficiency_gain": -18.0
+      },
+      "deltas": {
+        "keyword_recall_gain": 0.33333333333333337,
+        "retrieved_token_count_delta": -18.0,
+        "retrieval_depth_delta": 0.0
+      }
+    },
+    {
+      "scenario_name": "identity_shift",
+      "created_at": "2026-03-23T07:19:05.124790",
+      "notes": [
+        "The system should favor the updated self-model over obsolete self-description."
+      ],
+      "baseline": {
+        "keyword_recall": 0.75,
+        "retrieval_depth": 1.0,
+        "token_budget": 120.0,
+        "retrieved_token_count": 11.0,
+        "retrieved_node_count": 1.0,
+        "fallback_used": 0.0
+      },
+      "hierarchy": {
+        "keyword_recall": 0.75,
+        "retrieval_depth": 2.0,
+        "token_budget": 120.0,
+        "summary_count": 1.0,
+        "retrieved_token_count": 42.0,
+        "retrieved_node_count": 2.0,
+        "summary_node_count": 1.0,
+        "supporting_leaf_count": 1.0,
+        "branch_count": 1.0,
+        "fallback_used": 0.0,
+        "token_efficiency_gain": -31.0
+      },
+      "deltas": {
+        "keyword_recall_gain": 0.0,
+        "retrieved_token_count_delta": -31.0,
+        "retrieval_depth_delta": 1.0
+      }
+    }
+  ]
+}

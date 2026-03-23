@@ -87,7 +87,7 @@ class OpenAICompatibleClient(ModelClient):
         user_payload: dict[str, Any],
     ) -> dict[str, Any]:
         if not self.api_key:
-            raise RuntimeError("PROJECT_B_MODEL_API_KEY is required for openai-compatible provider.")
+            raise RuntimeError("PROJECT_MODEL_API_KEY is required for openai-compatible provider.")
         schema = self._schema_for_component(component)
         request_body = {
             "model": model_name,
