@@ -21,4 +21,6 @@ def test_eval_runner_reports_efficiency_metrics(memory_service: MemoryService) -
     assert "token_efficiency_gain" in hierarchy_metrics
     assert "summary_node_count" in hierarchy_metrics
     assert "retrieved_token_count" in baseline_metrics
+    assert "keyword_recall_per_token" in baseline_metrics
+    assert "recall_per_token_gain" in hierarchy_metrics
     assert hierarchy_metrics["retrieved_node_count"] >= 1

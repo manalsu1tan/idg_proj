@@ -1,0 +1,1717 @@
+{
+  "exported_at": "2026-03-24T04:08:19.330697+00:00",
+  "report_type": "benchmark_ablation_report",
+  "source": "on_demand_ablation_run",
+  "summary": {
+    "scenario_count": 5,
+    "winner_counts": {
+      "flat_baseline": 4,
+      "hierarchy_summary_only": 1,
+      "hierarchy_balanced": 0,
+      "hierarchy_drill_down": 0,
+      "hierarchy_top_leaf_only": 0
+    }
+  },
+  "scenarios": [
+    {
+      "scenario_name": "delayed_commitment",
+      "best_mode": "flat_baseline",
+      "notes": [
+        "Long-horizon recall after many irrelevant routines."
+      ],
+      "mode_results": [
+        {
+          "mode": "flat_baseline",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.75,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 15.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.05,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 5.0,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_summary_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.5,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 34.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.014705882352941176,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 1.4705882352941175,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_balanced",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.5,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 34.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.014705882352941176,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 1.4705882352941175,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_drill_down",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.5,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 24.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.020833333333333332,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 2.083333333333333,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_top_leaf_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.5,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 12.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.041666666666666664,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 4.166666666666666,
+              "details": {}
+            }
+          ],
+          "notes": []
+        }
+      ],
+      "created_at": "2026-03-24T03:54:21.439178"
+    },
+    {
+      "scenario_name": "routine_interruption",
+      "best_mode": "flat_baseline",
+      "notes": [
+        "Rare pivotal event should survive routine repetition."
+      ],
+      "mode_results": [
+        {
+          "mode": "flat_baseline",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 16.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 5.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.0625,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 6.25,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_summary_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.6666666666666666,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 26.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 5.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.02564102564102564,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 2.564102564102564,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_balanced",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 28.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 3.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 5.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.03571428571428571,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 3.571428571428571,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_drill_down",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 32.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 5.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.03125,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 3.125,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_top_leaf_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 16.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 5.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.0625,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 6.25,
+              "details": {}
+            }
+          ],
+          "notes": []
+        }
+      ],
+      "created_at": "2026-03-24T03:56:46.321629"
+    },
+    {
+      "scenario_name": "relationship_context",
+      "best_mode": "flat_baseline",
+      "notes": [
+        "Relationship context should remain recoverable as actionable guidance."
+      ],
+      "mode_results": [
+        {
+          "mode": "flat_baseline",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.5,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 8.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.038461538461538464,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 3.8461538461538463,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_summary_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.25,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 11.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 8.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.022727272727272728,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 2.272727272727273,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_balanced",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.25,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 11.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 8.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.022727272727272728,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 2.272727272727273,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_drill_down",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.25,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 22.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 8.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.011363636363636364,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 1.1363636363636365,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_top_leaf_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.25,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 11.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 8.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.022727272727272728,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 2.272727272727273,
+              "details": {}
+            }
+          ],
+          "notes": []
+        }
+      ],
+      "created_at": "2026-03-24T03:59:47.460853"
+    },
+    {
+      "scenario_name": "commitment_revision",
+      "best_mode": "hierarchy_summary_only",
+      "notes": [
+        "Later corrective evidence should dominate outdated commitments."
+      ],
+      "mode_results": [
+        {
+          "mode": "flat_baseline",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.6666666666666666,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 12.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 6.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.05555555555555555,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 5.555555555555555,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_summary_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.6666666666666666,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 9.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 6.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.07407407407407407,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 7.4074074074074066,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_balanced",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.6666666666666666,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 12.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 6.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.05555555555555555,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 5.555555555555555,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_drill_down",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.6666666666666666,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 24.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 6.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.027777777777777776,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 2.7777777777777777,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_top_leaf_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.6666666666666666,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 12.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 6.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.05555555555555555,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 5.555555555555555,
+              "details": {}
+            }
+          ],
+          "notes": []
+        }
+      ],
+      "created_at": "2026-03-24T04:02:49.158544"
+    },
+    {
+      "scenario_name": "identity_shift",
+      "best_mode": "flat_baseline",
+      "notes": [
+        "The system should favor the updated self-model over obsolete self-description."
+      ],
+      "mode_results": [
+        {
+          "mode": "flat_baseline",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.75,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 11.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.06818181818181818,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 6.8181818181818175,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_summary_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.75,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 14.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.05357142857142857,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 5.357142857142857,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_balanced",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.75,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 14.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.05357142857142857,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 5.357142857142857,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_drill_down",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.75,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 28.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.026785714285714284,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 2.6785714285714284,
+              "details": {}
+            }
+          ],
+          "notes": []
+        },
+        {
+          "mode": "hierarchy_top_leaf_only",
+          "metrics": [
+            {
+              "name": "keyword_recall",
+              "value": 0.75,
+              "details": {}
+            },
+            {
+              "name": "retrieval_depth",
+              "value": 2.0,
+              "details": {}
+            },
+            {
+              "name": "token_budget",
+              "value": 120.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_token_count",
+              "value": 14.0,
+              "details": {}
+            },
+            {
+              "name": "retrieved_node_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "summary_node_count",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "supporting_leaf_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "branch_count",
+              "value": 1.0,
+              "details": {}
+            },
+            {
+              "name": "fallback_used",
+              "value": 0.0,
+              "details": {}
+            },
+            {
+              "name": "summary_count",
+              "value": 13.0,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_token",
+              "value": 0.05357142857142857,
+              "details": {}
+            },
+            {
+              "name": "keyword_recall_per_100_tokens",
+              "value": 5.357142857142857,
+              "details": {}
+            }
+          ],
+          "notes": []
+        }
+      ],
+      "created_at": "2026-03-24T04:08:19.330191"
+    }
+  ]
+}

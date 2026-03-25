@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: bootstrap validate-postgres seed-benchmarks export-report test run-api run-eval migrate upgrade head
+.PHONY: bootstrap validate-postgres seed-benchmarks export-report export-ablation test run-api run-eval migrate upgrade head
 
 bootstrap:
 	./scripts/bootstrap_uv.sh
@@ -13,6 +13,9 @@ seed-benchmarks:
 
 export-report:
 	./scripts/export_benchmark_report.sh
+
+export-ablation:
+	./scripts/export_ablation_report.sh
 
 test:
 	$(PYTHON) -m pytest

@@ -27,7 +27,19 @@ def test_openai_compatible_client_uses_responses_api(monkeypatch) -> None:
         captured["headers"] = headers
         captured["json"] = json
         captured["timeout"] = timeout
-        return DummyResponse({"output_text": json_module.dumps({"text": "hello", "entities": [], "topics": [], "confidence": 0.8, "citations": []})})
+        return DummyResponse(
+            {
+                "output_text": json_module.dumps(
+                    {
+                        "text": "hello",
+                        "entities": [],
+                        "topics": [],
+                        "confidence": 0.8,
+                        "citations": [],
+                    }
+                )
+            }
+        )
 
     json_module = json
     monkeypatch.setattr("packages.memory_core.model_clients.httpx.post", fake_post)

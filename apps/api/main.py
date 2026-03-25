@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from apps.api.dependencies import get_service
+from packages.evals.ablation import build_ablation_report, render_ablation_markdown, run_all_ablations
 from packages.evals.report import build_report_payload, render_markdown_report
 from packages.evals.runner import run_all
 from packages.memory_core.services import MemoryService
@@ -88,6 +89,13 @@ def run_evals(_: EvalRequest, service: MemoryService = Depends(get_service)) -> 
     return run_all()
 
 
+@app.post("/v1/evals/ablations/run")
+def run_ablation_evals(_: EvalRequest, service: MemoryService = Depends(get_service)):
+    del service
+    results = run_all_ablations()
+    return build_ablation_report(results)
+
+
 @app.get("/v1/evals/runs")
 def list_eval_runs(service: MemoryService = Depends(get_service)):
     return service.eval_runs()
@@ -102,6 +110,13 @@ def get_eval_report(service: MemoryService = Depends(get_service)):
 def get_eval_report_markdown(service: MemoryService = Depends(get_service)) -> PlainTextResponse:
     report = build_report_payload(service.eval_runs())
     return PlainTextResponse(render_markdown_report(report), media_type="text/markdown")
+
+
+@app.get("/v1/evals/ablations/report.md")
+def get_ablation_report_markdown(service: MemoryService = Depends(get_service)) -> PlainTextResponse:
+    del service
+    report = build_ablation_report(run_all_ablations())
+    return PlainTextResponse(render_ablation_markdown(report), media_type="text/markdown")
 
 
 @app.get("/v1/nodes/{node_id}")

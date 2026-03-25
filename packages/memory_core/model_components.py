@@ -7,6 +7,7 @@ from datetime import datetime
 from packages.memory_core.model_clients import ModelClient, MockModelClient, OpenAICompatibleClient
 from packages.memory_core.prompts import load_prompt
 from packages.memory_core.settings import Settings
+from packages.memory_core.utils import extract_entities, token_count, truncate_to_token_count, unique_topics
 from packages.schemas.models import (
     MemoryNode,
     ModelProvider,
@@ -44,6 +45,7 @@ class ModelBackedSummarizer:
         self.prompt = load_prompt("summary_prompt.md")
 
     def generate(self, agent_id: str, child_nodes: list[MemoryNode]) -> tuple[SummaryResult, ModelTrace]:
+        summary_token_cap = self._summary_token_cap(child_nodes)
         request_payload = {
             "child_nodes": [
                 {
@@ -61,18 +63,26 @@ class ModelBackedSummarizer:
         response_payload = self.client.generate_json(
             component="summarizer",
             model_name=self.settings.summary_model,
-            system_prompt=self.prompt,
+            system_prompt=f"{self.prompt}\nKeep the final summary under {summary_token_cap} tokens.",
             user_payload=request_payload,
         )
+        raw_text = response_payload.get("text", "").strip()
+        capped_text = truncate_to_token_count(raw_text, summary_token_cap)
         result = SummaryResult(
-            text=response_payload.get("text", ""),
-            entities=response_payload.get("entities", []),
-            topics=response_payload.get("topics", []),
+            text=capped_text,
+            entities=response_payload.get("entities", []) or extract_entities(capped_text),
+            topics=response_payload.get("topics", []) or unique_topics(capped_text),
             confidence=float(response_payload.get("confidence", 0.0)),
             citations=response_payload.get("citations", []),
             prompt_version=self.settings.prompt_version,
             model_version=self.settings.summary_model,
-            raw_response=response_payload,
+            raw_response={
+                **response_payload,
+                "text": capped_text,
+                "token_capped": token_count(raw_text) > summary_token_cap,
+                "original_text": raw_text,
+                "summary_token_cap": summary_token_cap,
+            },
         )
         trace = ModelTrace(
             trace_id=str(uuid.uuid4()),
@@ -87,6 +97,28 @@ class ModelBackedSummarizer:
             response_payload=response_payload,
         )
         return result, trace
+
+    def _summary_token_cap(self, child_nodes: list[MemoryNode]) -> int:
+        combined = " ".join(node.text for node in child_nodes).lower()
+        if any(
+            token in combined
+            for token in [
+                "argument",
+                "conflict",
+                "tension",
+                "trust",
+                "feedback",
+                "communicat",
+                "surprise meeting",
+                "relationship",
+                "identify as",
+                "presenting",
+                "energizing",
+                "role",
+            ]
+        ):
+            return max(self.settings.summary_max_tokens, self.settings.social_summary_max_tokens)
+        return self.settings.summary_max_tokens
 
 
 class ModelBackedVerifier:

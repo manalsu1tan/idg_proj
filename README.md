@@ -56,6 +56,12 @@ To export a benchmark report from stored eval runs, use [`export_benchmark_repor
 
 This writes both JSON and Markdown artifacts under [`reports/`](/Users/Manal/Documents/GitHub/idg_proj/reports).
 
+To run retrieval-regime ablations and export an ablation report, use [`export_ablation_report.sh`](/Users/Manal/Documents/GitHub/idg_proj/scripts/export_ablation_report.sh):
+
+```bash
+./scripts/export_ablation_report.sh
+```
+
 ## Real model provider
 
 The repository now targets a real OpenAI-compatible endpoint by default in `.env.example`.

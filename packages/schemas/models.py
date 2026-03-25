@@ -42,6 +42,14 @@ class QueryMode(str, Enum):
     DRILL_DOWN = "drill_down"
 
 
+class AblationMode(str, Enum):
+    FLAT_BASELINE = "flat_baseline"
+    HIERARCHY_SUMMARY_ONLY = "hierarchy_summary_only"
+    HIERARCHY_BALANCED = "hierarchy_balanced"
+    HIERARCHY_DRILL_DOWN = "hierarchy_drill_down"
+    HIERARCHY_TOP_LEAF_ONLY = "hierarchy_top_leaf_only"
+
+
 class ModelProvider(str, Enum):
     MOCK = "mock"
     OPENAI_COMPATIBLE = "openai_compatible"
@@ -52,6 +60,14 @@ class RetrievalMetadata(BaseModel):
     relevance_score: float = 0.0
     access_count: int = 0
     last_accessed_at: datetime | None = None
+
+
+class StructuredSummary(BaseModel):
+    commitments: list[str] = Field(default_factory=list)
+    revisions: list[str] = Field(default_factory=list)
+    preferences: list[str] = Field(default_factory=list)
+    relationship_guidance: list[str] = Field(default_factory=list)
+    self_model_updates: list[str] = Field(default_factory=list)
 
 
 class MemoryNode(BaseModel):
@@ -70,6 +86,11 @@ class MemoryNode(BaseModel):
     retrieval_metadata: RetrievalMetadata = Field(default_factory=RetrievalMetadata)
     entities: list[str] = Field(default_factory=list)
     topics: list[str] = Field(default_factory=list)
+    commitments: list[str] = Field(default_factory=list)
+    revisions: list[str] = Field(default_factory=list)
+    preferences: list[str] = Field(default_factory=list)
+    relationship_guidance: list[str] = Field(default_factory=list)
+    self_model_updates: list[str] = Field(default_factory=list)
     version: int = 1
     stale_flag: bool = False
     summary_policy_id: str | None = None
@@ -198,6 +219,20 @@ class EvalRunResult(BaseModel):
     created_at: datetime | None = None
 
 
+class AblationModeResult(BaseModel):
+    mode: AblationMode
+    metrics: list[EvalMetric]
+    notes: list[str] = Field(default_factory=list)
+
+
+class AblationRunResult(BaseModel):
+    scenario_name: str
+    mode_results: list[AblationModeResult]
+    best_mode: AblationMode
+    notes: list[str] = Field(default_factory=list)
+    created_at: datetime | None = None
+
+
 class NodeProvenance(BaseModel):
     root: MemoryNode
     ancestors: list[MemoryNode] = Field(default_factory=list)
@@ -224,6 +259,11 @@ class SummaryResult(BaseModel):
     text: str
     entities: list[str] = Field(default_factory=list)
     topics: list[str] = Field(default_factory=list)
+    commitments: list[str] = Field(default_factory=list)
+    revisions: list[str] = Field(default_factory=list)
+    preferences: list[str] = Field(default_factory=list)
+    relationship_guidance: list[str] = Field(default_factory=list)
+    self_model_updates: list[str] = Field(default_factory=list)
     confidence: float = 0.0
     citations: list[str] = Field(default_factory=list)
     prompt_version: str | None = None

@@ -74,6 +74,11 @@ class NodeRecord(Base):
     last_accessed_at = Column(DateTime(timezone=False), nullable=True)
     entities = Column(Text, default="[]")
     topics = Column(Text, default="[]")
+    commitments = Column(Text, default="[]")
+    revisions = Column(Text, default="[]")
+    preferences = Column(Text, default="[]")
+    relationship_guidance = Column(Text, default="[]")
+    self_model_updates = Column(Text, default="[]")
     version = Column(Integer, default=1)
     stale_flag = Column(Boolean, default=False)
     summary_policy_id = Column(String(64), nullable=True)
@@ -188,6 +193,11 @@ class MemoryStore:
             importance_score=importance_score,
             entities=entities or extract_entities(text),
             topics=topics or unique_topics(text),
+            commitments=[],
+            revisions=[],
+            preferences=[],
+            relationship_guidance=[],
+            self_model_updates=[],
             version=1,
             stale_flag=False,
             summary_policy_id=None,
@@ -227,6 +237,11 @@ class MemoryStore:
             record.last_accessed_at = node.retrieval_metadata.last_accessed_at
             record.entities = json.dumps(node.entities)
             record.topics = json.dumps(node.topics)
+            record.commitments = json.dumps(node.commitments)
+            record.revisions = json.dumps(node.revisions)
+            record.preferences = json.dumps(node.preferences)
+            record.relationship_guidance = json.dumps(node.relationship_guidance)
+            record.self_model_updates = json.dumps(node.self_model_updates)
             record.version = node.version
             record.stale_flag = node.stale_flag
             record.summary_policy_id = node.summary_policy_id
@@ -533,6 +548,11 @@ class MemoryStore:
             ),
             entities=json.loads(record.entities),
             topics=json.loads(record.topics),
+            commitments=json.loads(record.commitments),
+            revisions=json.loads(record.revisions),
+            preferences=json.loads(record.preferences),
+            relationship_guidance=json.loads(record.relationship_guidance),
+            self_model_updates=json.loads(record.self_model_updates),
             version=record.version,
             stale_flag=record.stale_flag,
             summary_policy_id=record.summary_policy_id,

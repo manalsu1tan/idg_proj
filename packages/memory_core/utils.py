@@ -68,6 +68,17 @@ def token_count(text: str) -> int:
     return max(len(text.split()), 1)
 
 
+def truncate_to_token_count(text: str, max_tokens: int) -> str:
+    words = text.split()
+    if len(words) <= max_tokens:
+        return text.strip()
+    if max_tokens <= 3:
+        return " ".join(words[:max_tokens]).strip().rstrip(",;:")
+    head_count = max_tokens // 2
+    tail_count = max_tokens - head_count - 1
+    return " ".join(words[:head_count] + ["..."] + words[-tail_count:]).strip()
+
+
 def source_hash(items: list[str]) -> str:
     digest = hashlib.sha256()
     for item in items:

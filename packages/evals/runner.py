@@ -55,12 +55,16 @@ def run_scenario(service: MemoryService, scenario_name: str) -> EvalRunResult:
         )
     baseline_recall = keyword_recall(baseline.packed_context, scenario.expected_keywords)
     hierarchy_recall = keyword_recall(hierarchy.packed_context, scenario.expected_keywords)
+    baseline_recall_per_token = baseline_recall / max(float(baseline.diagnostics.retrieved_token_count), 1.0)
+    hierarchy_recall_per_token = hierarchy_recall / max(float(hierarchy.diagnostics.retrieved_token_count), 1.0)
     baseline_metrics = [
         metric("keyword_recall", baseline_recall),
         metric("retrieval_depth", float(baseline.retrieval_depth)),
         metric("token_budget", float(baseline.token_budget)),
         metric("retrieved_token_count", float(baseline.diagnostics.retrieved_token_count)),
         metric("retrieved_node_count", float(baseline.diagnostics.retrieved_node_count)),
+        metric("keyword_recall_per_token", baseline_recall_per_token),
+        metric("keyword_recall_per_100_tokens", baseline_recall_per_token * 100.0),
         metric("fallback_used", 1.0 if baseline.diagnostics.fallback_used else 0.0),
     ]
     hierarchy_metrics = [
@@ -73,12 +77,20 @@ def run_scenario(service: MemoryService, scenario_name: str) -> EvalRunResult:
         metric("summary_node_count", float(hierarchy.diagnostics.summary_node_count)),
         metric("supporting_leaf_count", float(hierarchy.diagnostics.supporting_leaf_count)),
         metric("branch_count", float(hierarchy.diagnostics.branch_count)),
+        metric("keyword_recall_per_token", hierarchy_recall_per_token),
+        metric("keyword_recall_per_100_tokens", hierarchy_recall_per_token * 100.0),
         metric("fallback_used", 1.0 if hierarchy.diagnostics.fallback_used else 0.0),
         metric(
             "token_efficiency_gain",
             float(baseline.diagnostics.retrieved_token_count - hierarchy.diagnostics.retrieved_token_count),
             baseline_tokens=baseline.diagnostics.retrieved_token_count,
             hierarchy_tokens=hierarchy.diagnostics.retrieved_token_count,
+        ),
+        metric(
+            "recall_per_token_gain",
+            hierarchy_recall_per_token - baseline_recall_per_token,
+            baseline_recall_per_token=baseline_recall_per_token,
+            hierarchy_recall_per_token=hierarchy_recall_per_token,
         ),
     ]
     result = EvalRunResult(

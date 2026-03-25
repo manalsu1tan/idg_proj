@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import statistics
 import uuid
 from dataclasses import dataclass
@@ -115,7 +116,7 @@ class TreeBuilder:
         clusters = self._cluster_nodes(nodes)
         built: list[MemoryNode] = []
         for cluster in clusters:
-            if len(cluster) < 2:
+            if not self._should_summarize_cluster(cluster):
                 continue
             support_hash = source_hash([item.node_id for item in cluster] + [item.text for item in cluster])
             existing = self.store.existing_summary(
@@ -143,6 +144,11 @@ class TreeBuilder:
                 retrieval_metadata=RetrievalMetadata(),
                 entities=summary_result.entities or extract_entities(summary_result.text),
                 topics=summary_result.topics or unique_topics(summary_result.text),
+                commitments=summary_result.commitments,
+                revisions=summary_result.revisions,
+                preferences=summary_result.preferences,
+                relationship_guidance=summary_result.relationship_guidance,
+                self_model_updates=summary_result.self_model_updates,
                 version=self.store.next_version(request.agent_id, request.target_level, support_hash),
                 stale_flag=False,
                 summary_policy_id="rolling-window-v1",
@@ -170,6 +176,21 @@ class TreeBuilder:
                     self.store.upsert_node(child)
             built.append(summary_node)
         return built
+
+    def _should_summarize_cluster(self, cluster: list[MemoryNode]) -> bool:
+        if len(cluster) >= 2:
+            return True
+        if not cluster:
+            return False
+        node = cluster[0]
+        return node.importance_score >= 0.85 or self._contains_revision_signal(node.text)
+
+    def _contains_revision_signal(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(
+            token in lowered
+            for token in ["updated", "changed", "now", "current", "latest", "revision", "correct", "obsolete", "instead"]
+        )
 
     def _cluster_nodes(self, nodes: list[MemoryNode]) -> list[list[MemoryNode]]:
         if not nodes:
@@ -222,31 +243,18 @@ class HierarchicalRetriever:
         picked: list[CandidateScore] = []
         consumed = 0
         max_depth = 1 if ranked_summaries else 0
-        for summary in ranked_summaries:
-            if consumed + summary.node.token_count <= token_budget:
-                picked.append(summary)
-                consumed += summary.node.token_count
-                self.store.mark_accessed(summary.node.node_id, summary.relevance, summary.recency, query_time)
-                trace_entries.append(
-                    RetrievalTraceEntry(
-                        node_id=summary.node.node_id,
-                        level=summary.node.level,
-                        node_type=summary.node.node_type,
-                        score=summary.score,
-                        relevance_score=summary.relevance,
-                        recency_score=summary.recency,
-                        importance_score=summary.node.importance_score,
-                        branch_root_id=summary.node.node_id,
-                        selected_as="summary",
-                        selection_reason="Selected as top branch candidate.",
-                    )
-                )
-            descend = mode == QueryMode.DRILL_DOWN
-            if mode == QueryMode.BALANCED and summary.relevance < 0.55:
-                descend = True
-            if mode == QueryMode.SUMMARY_ONLY or not descend:
-                continue
-            max_depth = max(max_depth, 2)
+        detail_query = self._is_detail_query(query)
+        revision_query = self._is_revision_query(query)
+        conflict_query = self._is_conflict_query(query)
+        branch_count = max(len(ranked_summaries), 1)
+        branch_budget = max(1, math.floor(token_budget / branch_count))
+
+        for index, summary in enumerate(ranked_summaries):
+            remaining = token_budget - consumed
+            if remaining <= 0:
+                break
+            branches_left = max(len(ranked_summaries) - index, 1)
+            branch_allowance = min(remaining, max(branch_budget, math.floor(remaining / branches_left)))
             children = [self.store.get_node(child_id) for child_id in summary.node.child_ids]
             child_scores: list[CandidateScore] = []
             for child in children:
@@ -256,30 +264,72 @@ class HierarchicalRetriever:
                 rec = recency_score(query_time, child.timestamp_end)
                 score = statistics.fmean([rel * 1.2, rec * 0.4, normalize_importance(child.importance_score)])
                 child_scores.append(CandidateScore(node=child, score=score, relevance=rel, recency=rec))
-            for child in sorted(child_scores, key=lambda item: item.score, reverse=True):
-                if consumed + child.node.token_count > token_budget:
-                    continue
-                consumed += child.node.token_count
-                self.store.mark_accessed(child.node.node_id, child.relevance, child.recency, query_time)
-                picked.append(child)
-                trace_entries.append(
-                    RetrievalTraceEntry(
-                        node_id=child.node.node_id,
-                        level=child.node.level,
-                        node_type=child.node.node_type,
-                        score=child.score,
-                        relevance_score=child.relevance,
-                        recency_score=child.recency,
-                        importance_score=child.node.importance_score,
-                        branch_root_id=summary.node.node_id,
-                        selected_as="supporting_leaf",
-                        selection_reason="Descended into branch for higher precision.",
-                    )
+            child_scores = sorted(child_scores, key=lambda item: item.score, reverse=True)
+            best_child = next((child for child in child_scores if child.node.token_count <= branch_allowance), None)
+
+            descend = False
+            if mode == QueryMode.DRILL_DOWN:
+                descend = best_child is not None
+            elif mode == QueryMode.BALANCED:
+                descend = best_child is not None and (
+                    (detail_query and summary.relevance < 0.72)
+                    or (revision_query and best_child.score >= summary.score * 0.92)
+                    or (conflict_query and best_child.score >= summary.score * 0.8)
                 )
-                if mode != QueryMode.DRILL_DOWN:
-                    break
+
+            if descend:
+                max_depth = max(max_depth, 2)
+                children_to_add = child_scores[:2] if mode == QueryMode.DRILL_DOWN else child_scores[:1]
+                added_child = False
+                branch_consumed = 0
+                for child in children_to_add:
+                    if child.node.token_count > branch_allowance - branch_consumed:
+                        continue
+                    consumed += child.node.token_count
+                    branch_consumed += child.node.token_count
+                    self.store.mark_accessed(child.node.node_id, child.relevance, child.recency, query_time)
+                    picked.append(child)
+                    added_child = True
+                    trace_entries.append(
+                        RetrievalTraceEntry(
+                            node_id=child.node.node_id,
+                            level=child.node.level,
+                            node_type=child.node.node_type,
+                            score=child.score,
+                            relevance_score=child.relevance,
+                            recency_score=child.recency,
+                            importance_score=child.node.importance_score,
+                            branch_root_id=summary.node.node_id,
+                            selected_as="supporting_leaf",
+                            selection_reason="Descended into branch because the query requires specifics, revisions, or conflict details.",
+                        )
+                    )
+                if added_child:
+                    continue
+
+            if summary.node.token_count > branch_allowance:
+                continue
+            picked.append(summary)
+            consumed += summary.node.token_count
+            self.store.mark_accessed(summary.node.node_id, summary.relevance, summary.recency, query_time)
+            trace_entries.append(
+                RetrievalTraceEntry(
+                    node_id=summary.node.node_id,
+                    level=summary.node.level,
+                    node_type=summary.node.node_type,
+                    score=summary.score,
+                    relevance_score=summary.relevance,
+                    recency_score=summary.recency,
+                    importance_score=summary.node.importance_score,
+                    branch_root_id=summary.node.node_id,
+                    selected_as="summary",
+                    selection_reason="Selected as the branch summary under the per-branch budget.",
+                )
+            )
+
         if not picked:
-            fallback = self.flat_retriever.retrieve(agent_id, query, query_time, token_budget, limit=branch_limit)
+            fallback_limit = min(branch_limit, 2) if detail_query else 1
+            fallback = self.flat_retriever.retrieve(agent_id, query, query_time, token_budget, limit=fallback_limit)
             fallback_entries = [
                 RetrievalTraceEntry(
                     node_id=item.node.node_id,
@@ -299,18 +349,45 @@ class HierarchicalRetriever:
         ranked = sorted(picked, key=lambda item: item.score, reverse=True)
         return ranked, max_depth, trace_entries
 
+    def _is_detail_query(self, query: str) -> bool:
+        lowered = query.lower()
+        return any(
+            token in lowered
+            for token in ["when", "what exactly", "which", "latest", "changed", "say", "details", "specific", "why"]
+        )
+
+    def _is_revision_query(self, query: str) -> bool:
+        lowered = query.lower()
+        return any(token in lowered for token in ["latest", "updated", "changed", "revision", "still", "now", "current"])
+
+    def _is_conflict_query(self, query: str) -> bool:
+        lowered = query.lower()
+        return any(
+            token in lowered
+            for token in ["conflict", "argument", "fight", "tension", "issue", "problem", "with whom", "who was involved"]
+        )
+
 
 class ContextPacker:
     def pack(self, query: str, candidates: list[CandidateScore], token_budget: int) -> str:
         lines = [f"Query: {query}", "Context:"]
         consumed = token_count(query)
+        packed_texts: list[str] = []
+        seen_nodes: set[str] = set()
         for candidate in candidates:
+            if candidate.node.node_id in seen_nodes:
+                continue
+            overlap = max((jaccard_similarity(candidate.node.text, existing) for existing in packed_texts), default=0.0)
+            if overlap >= 0.72:
+                continue
             snippet = f"[{candidate.node.level.value}/{candidate.node.node_type.value}] {candidate.node.text}"
             snippet_tokens = token_count(snippet)
             if consumed + snippet_tokens > token_budget:
                 continue
             lines.append(snippet)
             consumed += snippet_tokens
+            seen_nodes.add(candidate.node.node_id)
+            packed_texts.append(candidate.node.text)
         return "\n".join(lines)
 
 

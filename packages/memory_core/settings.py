@@ -42,6 +42,8 @@ class Settings:
     max_branches: int = field(default_factory=lambda: int(os.getenv("PROJECT_MAX_BRANCHES", "3")))
     default_token_budget: int = field(default_factory=lambda: int(os.getenv("PROJECT_DEFAULT_TOKEN_BUDGET", "180")))
     embedding_dimensions: int = field(default_factory=lambda: int(os.getenv("PROJECT_EMBEDDING_DIMENSIONS", "12")))
+    summary_max_tokens: int = field(default_factory=lambda: int(os.getenv("PROJECT_SUMMARY_MAX_TOKENS", "18")))
+    social_summary_max_tokens: int = field(default_factory=lambda: int(os.getenv("PROJECT_SOCIAL_SUMMARY_MAX_TOKENS", "24")))
     auto_create_schema: bool = field(default_factory=lambda: os.getenv("PROJECT_AUTO_CREATE_SCHEMA", "true").lower() == "true")
     ui_enabled: bool = field(default_factory=lambda: os.getenv("PROJECT_UI_ENABLED", "true").lower() == "true")
 

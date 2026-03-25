@@ -6,8 +6,11 @@ from fastapi.testclient import TestClient
 
 from apps.api.main import app
 from apps.api.dependencies import get_service
+from packages.memory_core.model_components import ModelBackedSummarizer
+from packages.memory_core.model_clients import MockModelClient
 from packages.memory_core.services import MemoryService
 from packages.memory_core.settings import Settings
+from packages.schemas.models import ModelProvider
 from packages.schemas.models import BuildSummariesRequest, IngestMemoryRequest, QueryMode, RefreshRequest, dump_model_json
 
 
@@ -20,6 +23,22 @@ def test_builds_traceable_summaries(memory_service: MemoryService) -> None:
     provenance = memory_service.node_provenance(summaries[0].node_id)
     assert len(provenance.supports) == 2
     assert set(summaries[0].support_ids) == {node.node_id for node in provenance.supports}
+    assert "prototype" in summaries[0].text.lower()
+
+
+def test_builds_singleton_summary_for_pivotal_event(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-singleton",
+        "Updated the plan: the prototype now ships Friday after QA.",
+        base,
+        0.96,
+    )
+    summaries = memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-singleton"))
+    assert len(summaries) == 1
+    assert summaries[0].child_ids
+    assert summaries[0].token_count <= memory_service.settings.summary_max_tokens
+    assert "friday" in summaries[0].text.lower()
 
 
 def test_hierarchy_beats_flat_recall(memory_service: MemoryService) -> None:
@@ -93,6 +112,156 @@ def test_context_pack_respects_budget(memory_service: MemoryService) -> None:
         branch_limit=5,
     )
     assert len(response.packed_context.split()) <= 25
+
+
+
+
+def test_balanced_retrieval_prefers_summary_without_duplicate_leaf_drilldown(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-branch",
+        "Met Maria and promised to bring the prototype to the Friday demo.",
+        base,
+        0.95,
+    )
+    memory_service.agent_loop.observe(
+        "agent-branch",
+        "Reflected that Maria only needs the finished prototype, not the draft.",
+        base + timedelta(hours=1),
+        0.88,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-branch"))
+    response = memory_service.retrieve(
+        agent_id="agent-branch",
+        query="What is my commitment to Maria for the Friday demo?",
+        query_time=base + timedelta(days=1),
+        mode=QueryMode.BALANCED,
+        token_budget=80,
+        branch_limit=2,
+    )
+    selected_as = {item.selected_as for item in response.retrieved_nodes}
+    assert "summary" in selected_as
+    assert response.diagnostics.supporting_leaf_count == 0
+
+
+def test_detail_queries_descend_instead_of_packing_summary_and_leaf(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-detail",
+        "Maria changed the ask and now wants the finished prototype at the Friday demo.",
+        base,
+        0.95,
+    )
+    memory_service.agent_loop.observe(
+        "agent-detail",
+        "The earlier draft version is obsolete after Maria's update.",
+        base + timedelta(hours=1),
+        0.9,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-detail"))
+    response = memory_service.retrieve(
+        agent_id="agent-detail",
+        query="What changed in Maria's latest request?",
+        query_time=base + timedelta(days=1),
+        mode=QueryMode.BALANCED,
+        token_budget=80,
+        branch_limit=2,
+    )
+    selected_as = {item.selected_as for item in response.retrieved_nodes}
+    assert "supporting_leaf" in selected_as
+    assert "summary" not in selected_as
+
+
+def test_conflict_queries_descend_for_specific_event_details(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-conflict",
+        "Had a tense argument with Jordan about a missed handoff and agreed to repair trust tomorrow.",
+        base,
+        0.95,
+    )
+    memory_service.agent_loop.observe(
+        "agent-conflict",
+        "Reflected that the conflict with Jordan was serious because the handoff failed in public.",
+        base + timedelta(hours=1),
+        0.88,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-conflict"))
+    response = memory_service.retrieve(
+        agent_id="agent-conflict",
+        query="What major conflict happened recently and with whom?",
+        query_time=base + timedelta(days=1),
+        mode=QueryMode.BALANCED,
+        token_budget=80,
+        branch_limit=2,
+    )
+    assert response.diagnostics.supporting_leaf_count >= 1
+    assert any(item.selected_as == "supporting_leaf" for item in response.retrieved_nodes)
+
+
+def test_revision_queries_can_span_multiple_branches(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe("agent-revision", "Committed to shipping the prototype on Thursday.", base, 0.9)
+    memory_service.agent_loop.observe("agent-revision", "Updated the plan: the prototype will ship on Friday after extra QA.", base + timedelta(days=3), 0.95)
+    memory_service.agent_loop.observe("agent-revision", "Told the team that Friday is the correct launch date now.", base + timedelta(days=4), 0.88)
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-revision"))
+    response = memory_service.retrieve(
+        agent_id="agent-revision",
+        query="When is the prototype actually supposed to ship now?",
+        query_time=base + timedelta(days=5),
+        mode=QueryMode.BALANCED,
+        token_budget=90,
+        branch_limit=3,
+    )
+    assert response.diagnostics.branch_count >= 1
+    assert response.diagnostics.supporting_leaf_count >= 1
+
+
+def test_general_query_flat_fallback_is_cheap(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    for index in range(3):
+        memory_service.agent_loop.observe(
+            "agent-fallback",
+            f"Important meeting {index} about roadmap priorities and team staffing.",
+            base + timedelta(hours=index),
+            0.8,
+        )
+    response = memory_service.retrieve(
+        agent_id="agent-fallback",
+        query="What important meeting happened?",
+        query_time=base + timedelta(days=1),
+        mode=QueryMode.BALANCED,
+        token_budget=80,
+        branch_limit=3,
+    )
+    assert response.diagnostics.fallback_used is True
+    assert response.diagnostics.retrieved_node_count == 1
+
+
+def test_social_and_identity_clusters_get_wider_summary_cap() -> None:
+    settings = Settings(
+        database_url="sqlite+pysqlite:///:memory:",
+        model_provider="mock",
+        summary_max_tokens=8,
+        social_summary_max_tokens=14,
+    )
+    summarizer = ModelBackedSummarizer(MockModelClient(), ModelProvider.MOCK, settings)
+    service = MemoryService(settings)
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    social_node = service.agent_loop.observe(
+        "agent-social",
+        "Avery prefers direct feedback and hates surprise meetings.",
+        base,
+        0.9,
+    )
+    neutral_node = service.agent_loop.observe(
+        "agent-neutral",
+        "Reviewed sprint metrics and updated the dashboard.",
+        base + timedelta(hours=1),
+        0.4,
+    )
+    assert summarizer._summary_token_cap([social_node]) == 14
+    assert summarizer._summary_token_cap([neutral_node]) == 8
 
 
 def test_api_endpoints(memory_service: MemoryService) -> None:
