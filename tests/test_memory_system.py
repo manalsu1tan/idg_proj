@@ -41,7 +41,7 @@ def test_builds_singleton_summary_for_pivotal_event(memory_service: MemoryServic
     assert "friday" in summaries[0].text.lower()
 
 
-def test_hierarchy_beats_flat_recall(memory_service: MemoryService) -> None:
+def test_commitment_queries_use_flat_router_for_best_leaf(memory_service: MemoryService) -> None:
     base = datetime(2025, 1, 1, 9, 0, 0)
     memory_service.agent_loop.observe(
         "agent-2",
@@ -80,8 +80,9 @@ def test_hierarchy_beats_flat_recall(memory_service: MemoryService) -> None:
         branch_limit=2,
     )
     assert "prototype" not in flat.packed_context.lower()
-    assert "prototype" in hierarchical.packed_context.lower()
-    assert hierarchical.retrieval_depth >= 1
+    assert hierarchical.packed_context == flat.packed_context
+    assert hierarchical.retrieval_depth == 1
+    assert all(item.selected_as == "query_router_flat" for item in hierarchical.retrieved_nodes)
 
 
 def test_refresh_marks_parent_stale(memory_service: MemoryService) -> None:
@@ -170,6 +171,35 @@ def test_detail_queries_descend_instead_of_packing_summary_and_leaf(memory_servi
     selected_as = {item.selected_as for item in response.retrieved_nodes}
     assert "supporting_leaf" in selected_as
     assert "summary" not in selected_as
+
+
+def test_commitment_queries_route_to_flat_top1(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-commitment-router",
+        "Met Maria and promised to bring the finished prototype to the Friday demo.",
+        base,
+        0.95,
+    )
+    memory_service.agent_loop.observe(
+        "agent-commitment-router",
+        "Wrote a prep checklist for meeting Maria at the Friday demo: pack the finished prototype, badge, and charger.",
+        base + timedelta(hours=1),
+        0.72,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-commitment-router"))
+    response = memory_service.retrieve(
+        agent_id="agent-commitment-router",
+        query="What commitment did I make to Maria about the Friday demo?",
+        query_time=base + timedelta(days=1),
+        mode=QueryMode.BALANCED,
+        token_budget=80,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth == 1
+    assert response.diagnostics.summary_node_count == 0
+    assert response.diagnostics.retrieved_node_count == 1
+    assert all(item.selected_as == "query_router_flat" for item in response.retrieved_nodes)
 
 
 def test_conflict_queries_descend_for_specific_event_details(memory_service: MemoryService) -> None:
@@ -262,6 +292,32 @@ def test_social_and_identity_clusters_get_wider_summary_cap() -> None:
     )
     assert summarizer._summary_token_cap([social_node]) == 14
     assert summarizer._summary_token_cap([neutral_node]) == 8
+
+
+def test_identity_queries_remain_on_hierarchy_path(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-hierarchy-identity",
+        "Used to identify as a backend engineer who avoids presenting.",
+        base,
+        0.7,
+    )
+    memory_service.agent_loop.observe(
+        "agent-hierarchy-identity",
+        "Reflected that I now enjoy presenting research demos and should lean into that role.",
+        base + timedelta(days=5),
+        0.94,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-hierarchy-identity"))
+    response = memory_service.retrieve(
+        agent_id="agent-hierarchy-identity",
+        query="How do I describe my current relationship to presenting or facilitation?",
+        query_time=base + timedelta(days=10),
+        mode=QueryMode.BALANCED,
+        token_budget=90,
+        branch_limit=3,
+    )
+    assert all(item.selected_as != "query_router_flat" for item in response.retrieved_nodes)
 
 
 def test_api_endpoints(memory_service: MemoryService) -> None:

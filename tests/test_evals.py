@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from packages.evals.runner import run_scenario
-from packages.evals.scenarios import DEFAULT_SCENARIO_SEEDS, all_scenarios
+from packages.evals.scenarios import DEFAULT_SCENARIO_SEEDS, all_scenarios, delayed_commitment_scenario
 from packages.memory_core.services import MemoryService
 
 
@@ -31,3 +31,12 @@ def test_eval_runner_reports_efficiency_metrics(memory_service: MemoryService) -
     assert "recall_per_token_gain" in hierarchy_metrics
     assert "slot_recall_gain" in hierarchy_metrics
     assert hierarchy_metrics["retrieved_node_count"] >= 1
+
+
+def test_delayed_commitment_setup_avoids_revision_like_routine_noise() -> None:
+    scenario = delayed_commitment_scenario(11)
+    routine_texts = [event.text.lower() for event in scenario.events if event.day_offset >= 2]
+    assert not any("updated the roadmap board" in text for text in routine_texts)
+    assert "action" in scenario.expected_slots
+    assert "commitment" in scenario.expected_slots
+    assert "what commitment did i make" in scenario.query.lower()

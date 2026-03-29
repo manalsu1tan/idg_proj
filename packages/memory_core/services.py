@@ -231,6 +231,26 @@ class HierarchicalRetriever:
         token_budget: int,
         branch_limit: int,
     ) -> tuple[list[CandidateScore], int, list[RetrievalTraceEntry]]:
+        commitment_query = self._is_commitment_query(query)
+        if mode == QueryMode.BALANCED and commitment_query:
+            routed = self.flat_retriever.retrieve(agent_id, query, query_time, token_budget, limit=1)
+            routed_entries = [
+                RetrievalTraceEntry(
+                    node_id=item.node.node_id,
+                    level=item.node.level,
+                    node_type=item.node.node_type,
+                    score=item.score,
+                    relevance_score=item.relevance,
+                    recency_score=item.recency,
+                    importance_score=item.node.importance_score,
+                    branch_root_id=None,
+                    selected_as="query_router_flat",
+                    selection_reason="Routed to flat top-1 retrieval because the query asks for an explicit commitment.",
+                )
+                for item in routed
+            ]
+            return routed, 1, routed_entries
+
         summaries = self.store.list_nodes(agent_id=agent_id, level=MemoryLevel.L1)
         summary_scores: list[CandidateScore] = []
         trace_entries: list[RetrievalTraceEntry] = []
@@ -356,9 +376,36 @@ class HierarchicalRetriever:
             for token in ["when", "what exactly", "which", "latest", "changed", "say", "details", "specific", "why"]
         )
 
+    def _is_commitment_query(self, query: str) -> bool:
+        lowered = query.lower()
+        return any(
+            token in lowered
+            for token in [
+                "what commitment did i make",
+                "what did i promise",
+                "what was i supposed to bring",
+                "what did i agree to bring",
+                "what commitment did i make to",
+            ]
+        )
+
     def _is_revision_query(self, query: str) -> bool:
         lowered = query.lower()
         return any(token in lowered for token in ["latest", "updated", "changed", "revision", "still", "now", "current"])
+
+    def _is_relationship_query(self, query: str) -> bool:
+        lowered = query.lower()
+        return any(
+            token in lowered
+            for token in ["communicate", "communication", "relationship", "what do i know about", "based on what i know"]
+        )
+
+    def _is_identity_query(self, query: str) -> bool:
+        lowered = query.lower()
+        return any(
+            token in lowered
+            for token in ["describe my current relationship", "how do i describe", "identity", "role", "who am i now", "presenting or facilitation"]
+        )
 
     def _is_conflict_query(self, query: str) -> bool:
         lowered = query.lower()

@@ -60,7 +60,7 @@ def delayed_commitment_scenario(seed: int) -> Scenario:
     routine_templates = [
         "reviewed dashboard metrics and ate lunch at the office",
         "worked through tickets and checked the sprint board",
-        "cleared email, joined standup, and updated the roadmap board",
+        "cleared email, joined standup, and reviewed the roadmap board",
         "handled routine code review and backlog grooming",
     ]
     routine = [
@@ -78,9 +78,9 @@ def delayed_commitment_scenario(seed: int) -> Scenario:
             importance=0.95,
         ),
         ScenarioEvent(
-            text=f"Planned that the promised item for {person} is the {item} for the {event}.",
+            text=f"Wrote a prep checklist for meeting {person} at the {event}: pack the {item}, badge, and charger.",
             day_offset=1,
-            importance=0.9,
+            importance=0.72,
         ),
         ScenarioEvent(
             text=f"Packed presentation notes for the {event} but did not restate the promise to {person}.",
@@ -92,6 +92,8 @@ def delayed_commitment_scenario(seed: int) -> Scenario:
         "person": [person.lower()],
         "item": [item.lower()],
         "event": [event.lower()],
+        "action": ["bring"],
+        "commitment": ["promised"],
     }
     return Scenario(
         name=_scenario_id("delayed_commitment", seed),
@@ -99,9 +101,9 @@ def delayed_commitment_scenario(seed: int) -> Scenario:
         agent_id=_agent_id("delayed_commitment", seed),
         seed=seed,
         events=sorted(key_events + routine, key=lambda item: item.day_offset),
-        query=f"What did I promise {person} to bring for the {event}?",
+        query=f"What commitment did I make to {person} about the {event}?",
         query_day_offset=14,
-        expected_keywords=_flatten_keywords(expected_slots, ["promised"]),
+        expected_keywords=_flatten_keywords(expected_slots, []),
         expected_slots=expected_slots,
         notes=["Long-horizon recall after many irrelevant routines."],
     )
