@@ -213,6 +213,9 @@ class EvalMetric(BaseModel):
 
 class EvalRunResult(BaseModel):
     scenario_name: str
+    family_name: str | None = None
+    instance_id: str | None = None
+    seed: int | None = None
     baseline_metrics: list[EvalMetric]
     hierarchy_metrics: list[EvalMetric]
     notes: list[str] = Field(default_factory=list)
@@ -227,6 +230,9 @@ class AblationModeResult(BaseModel):
 
 class AblationRunResult(BaseModel):
     scenario_name: str
+    family_name: str | None = None
+    instance_id: str | None = None
+    seed: int | None = None
     mode_results: list[AblationModeResult]
     best_mode: AblationMode
     notes: list[str] = Field(default_factory=list)

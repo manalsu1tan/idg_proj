@@ -7,8 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from packages.evals.scenarios import all_scenarios, scenario_timestamp
-from packages.evals.runner import keyword_recall, metric
+from packages.evals.scenarios import all_scenarios, get_scenario, scenario_timestamp
+from packages.evals.runner import keyword_recall, metric, slot_recall
 from packages.memory_core.services import CandidateScore, MemoryService, build_retrieval_diagnostics
 from packages.memory_core.settings import load_settings
 from packages.schemas.models import (
@@ -46,14 +46,24 @@ def _metrics_from_response(mode: AblationMode, response: RetrieveResponse, summa
     return AblationModeResult(mode=mode, metrics=metrics)
 
 
-def _append_recall_metrics(result: AblationModeResult, response: RetrieveResponse, expected_keywords: list[str]) -> AblationModeResult:
+def _append_recall_metrics(
+    result: AblationModeResult,
+    response: RetrieveResponse,
+    expected_keywords: list[str],
+    expected_slots: dict[str, list[str]],
+) -> AblationModeResult:
     recall = keyword_recall(response.packed_context, expected_keywords)
+    slot_score, slot_map = slot_recall(response.packed_context, expected_slots)
     recall_per_token = recall / max(float(response.diagnostics.retrieved_token_count), 1.0)
+    slot_recall_per_token = slot_score / max(float(response.diagnostics.retrieved_token_count), 1.0)
     result.metrics = [
         metric("keyword_recall", recall),
+        metric("slot_recall", slot_score, slot_count=len(expected_slots), **slot_map),
         *result.metrics,
         metric("keyword_recall_per_token", recall_per_token),
         metric("keyword_recall_per_100_tokens", recall_per_token * 100.0),
+        metric("slot_recall_per_token", slot_recall_per_token),
+        metric("slot_recall_per_100_tokens", slot_recall_per_token * 100.0),
     ]
     return result
 
@@ -114,8 +124,9 @@ def _best_mode(mode_results: list[AblationModeResult]) -> AblationMode:
     def score_tuple(result: AblationModeResult) -> tuple[float, float, float]:
         metric_map = {item.name: item.value for item in result.metrics}
         return (
+            metric_map.get("slot_recall", 0.0),
             metric_map.get("keyword_recall", 0.0),
-            metric_map.get("keyword_recall_per_token", 0.0),
+            metric_map.get("slot_recall_per_token", 0.0),
             -metric_map.get("retrieved_token_count", 0.0),
         )
 
@@ -123,7 +134,7 @@ def _best_mode(mode_results: list[AblationModeResult]) -> AblationMode:
 
 
 def run_ablation_scenario(service: MemoryService, scenario_name: str) -> AblationRunResult:
-    scenario = next(item for item in all_scenarios() if item.name == scenario_name)
+    scenario = get_scenario(scenario_name)
     for event in scenario.events:
         service.agent_loop.observe(
             agent_id=scenario.agent_id,
@@ -161,11 +172,14 @@ def run_ablation_scenario(service: MemoryService, scenario_name: str) -> Ablatio
     for mode, runner in runners.items():
         response = runner()
         result = _metrics_from_response(mode, response, summary_count=len(built))
-        result = _append_recall_metrics(result, response, scenario.expected_keywords)
+        result = _append_recall_metrics(result, response, scenario.expected_keywords, scenario.expected_slots)
         mode_results.append(result)
 
     return AblationRunResult(
         scenario_name=scenario.name,
+        family_name=scenario.family_name,
+        instance_id=scenario.name,
+        seed=scenario.seed,
         mode_results=mode_results,
         best_mode=_best_mode(mode_results),
         notes=scenario.notes,
@@ -189,6 +203,8 @@ def build_ablation_report(results: list[AblationRunResult]) -> dict:
         rows.append(
             {
                 "scenario_name": result.scenario_name,
+                "family_name": result.family_name,
+                "seed": result.seed,
                 "best_mode": result.best_mode.value,
                 "notes": result.notes,
                 "mode_results": [dump_model_json(mode_result) for mode_result in result.mode_results],

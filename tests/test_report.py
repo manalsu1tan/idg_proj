@@ -13,7 +13,10 @@ def test_benchmark_report_export_writes_json_and_markdown(memory_service: Memory
 
     report = build_report_payload(memory_service.eval_runs())
     assert report['summary']['scenario_count'] == 2
-    assert report['summary']['hierarchy_avg_keyword_recall'] >= report['summary']['baseline_avg_keyword_recall']
+    assert report['summary']['family_count'] >= 2
+    assert 'baseline_slot_recall_mean' in report['summary']
+    assert 'hierarchy_win_rate' in report['summary']
+    assert report['families']
 
     paths = export_report(memory_service, output_dir=tmp_path, stem='benchmark_test')
     assert paths['json'].exists()
@@ -23,4 +26,5 @@ def test_benchmark_report_export_writes_json_and_markdown(memory_service: Memory
     assert payload['report_type'] == 'benchmark_eval_report'
     markdown = paths['markdown'].read_text(encoding='utf-8')
     assert '# Benchmark Report' in markdown
+    assert 'Family Aggregates' in markdown
     assert 'relationship_context' in markdown
