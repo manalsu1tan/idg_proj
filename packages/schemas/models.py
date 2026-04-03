@@ -163,6 +163,9 @@ class RetrievalDiagnostics(BaseModel):
     avg_score: float = 0.0
     max_score: float = 0.0
     fallback_used: bool = False
+    routing_strategy: str | None = None
+    query_feature_scores: dict[str, float] = Field(default_factory=dict)
+    fired_rules: list[str] = Field(default_factory=list)
 
 
 class RetrievalTrace(BaseModel):

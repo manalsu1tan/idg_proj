@@ -69,7 +69,7 @@ def _append_recall_metrics(
 
 
 def _top_leaf_only_response(service: MemoryService, *, agent_id: str, query: str, query_time: datetime, token_budget: int) -> RetrieveResponse:
-    retrieved, depth, trace_entries = service.hierarchical_retriever.retrieve(
+    retrieved, depth, trace_entries, routing_attribution = service.hierarchical_retriever.retrieve(
         agent_id=agent_id,
         query=query,
         query_time=query_time,
@@ -82,7 +82,7 @@ def _top_leaf_only_response(service: MemoryService, *, agent_id: str, query: str
     selected_ids = {candidate.node.node_id for candidate in selected}
     selected_entries = [entry for entry in trace_entries if entry.node_id in selected_ids]
     packed = service.context_packer.pack(query, selected, token_budget)
-    diagnostics = build_retrieval_diagnostics(selected, selected_entries, packed)
+    diagnostics = build_retrieval_diagnostics(selected, selected_entries, packed, routing_attribution=routing_attribution)
     trace = RetrievalTrace(
         trace_id=str(uuid.uuid4()),
         agent_id=agent_id,

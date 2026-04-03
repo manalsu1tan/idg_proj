@@ -1,0 +1,99 @@
+{
+  "feature_triggers": {
+    "temporal_cue": [
+      "latest",
+      "updated",
+      "changed",
+      "revision",
+      "current",
+      "now",
+      "ship",
+      "launch",
+      "when",
+      "actually"
+    ],
+    "conflict_cue": [
+      "conflict",
+      "argument",
+      "fight",
+      "tension",
+      "issue",
+      "problem",
+      "clash",
+      "with whom",
+      "who was involved"
+    ],
+    "composition_cue": [
+      "based on what i know",
+      "given their",
+      "preferences and dislikes",
+      "and dislikes",
+      "using what i already know",
+      "communicate",
+      "communication",
+      "talk",
+      "message",
+      "preference",
+      "prefer",
+      "dislike",
+      "avoid",
+      "what am i bringing for",
+      "what did i say i'd bring for",
+      "which item",
+      "commit",
+      "bringing"
+    ],
+    "negation_cue": [
+      "not",
+      "never",
+      "don't",
+      "didn't",
+      "did not",
+      "do not",
+      "agree to bring",
+      "agreed to bring",
+      "pack"
+    ],
+    "entity_ambiguity_cue": [
+      "alias",
+      "pronoun",
+      "he",
+      "she",
+      "they",
+      "him",
+      "her",
+      "different person",
+      "same name",
+      "who exactly",
+      "which person",
+      "whom",
+      "describe",
+      "identity",
+      "role",
+      "presenting",
+      "facilitation"
+    ]
+  },
+  "feature_norms": {
+    "temporal_cue": 3.0,
+    "conflict_cue": 2.0,
+    "composition_cue": 3.0,
+    "negation_cue": 2.0,
+    "entity_ambiguity_cue": 3.0
+  },
+  "feature_weights": {
+    "temporal_cue": 1.0,
+    "conflict_cue": 1.0,
+    "composition_cue": 1.0,
+    "negation_cue": 1.0,
+    "entity_ambiguity_cue": 1.0
+  },
+  "strategy_thresholds": {
+    "flat_top1_max": 0.32,
+    "revision_leaf_min": 0.45,
+    "coverage_min": 0.45,
+    "hierarchy_expand_min": 0.48,
+    "multi_branch_min": 0.65,
+    "feature_active_min": 0.34
+  }
+}

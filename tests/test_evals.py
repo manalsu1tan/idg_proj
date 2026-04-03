@@ -1,7 +1,17 @@
 from __future__ import annotations
 
-from packages.evals.runner import run_scenario
-from packages.evals.scenarios import DEFAULT_SCENARIO_SEEDS, all_scenarios, delayed_commitment_scenario
+from packages.evals.runner import run_scenario, run_selected
+from packages.evals.scenarios import (
+    QUICK_SCENARIO_FAMILIES,
+    SCENARIO_BUILDERS,
+    DEFAULT_SCENARIO_SEEDS,
+    QUERY_PARAPHRASE_STYLES,
+    all_scenarios,
+    delayed_commitment_scenario,
+    paraphrase_query,
+    quick_scenarios,
+    scenario_with_paraphrase,
+)
 from packages.memory_core.services import MemoryService
 
 
@@ -13,7 +23,7 @@ def test_all_scenarios_are_registered() -> None:
     assert "relationship_context" in family_names
     assert "commitment_revision" in family_names
     assert "identity_shift" in family_names
-    assert len(scenarios) == 5 * len(DEFAULT_SCENARIO_SEEDS)
+    assert len(scenarios) == len(SCENARIO_BUILDERS) * len(DEFAULT_SCENARIO_SEEDS)
     assert all("__seed_" in scenario.name for scenario in scenarios)
 
 
@@ -39,4 +49,49 @@ def test_delayed_commitment_setup_avoids_revision_like_routine_noise() -> None:
     assert not any("updated the roadmap board" in text for text in routine_texts)
     assert "action" in scenario.expected_slots
     assert "commitment" in scenario.expected_slots
-    assert "what commitment did i make" in scenario.query.lower()
+    assert "commit to bringing" in scenario.query.lower()
+
+
+def test_quick_subset_is_small_and_targeted() -> None:
+    scenarios = quick_scenarios()
+    assert len(scenarios) == len(QUICK_SCENARIO_FAMILIES)
+    assert {scenario.family_name for scenario in scenarios} == set(QUICK_SCENARIO_FAMILIES)
+
+
+def test_run_selected_quick_mode_executes(memory_service: MemoryService) -> None:
+    results = run_selected(seeds=(11,), quick=True, service=memory_service)
+    assert len(results) == len(QUICK_SCENARIO_FAMILIES)
+    assert all(result.seed == 11 for result in results)
+
+
+def test_query_paraphrase_changes_surface_form() -> None:
+    query = "When is the prototype actually supposed to ship now?"
+    paraphrased = paraphrase_query(query, "concise")
+    assert paraphrased != query
+    assert "ship" in paraphrased.lower()
+
+
+def test_scenario_with_paraphrase_changes_name_agent_and_query() -> None:
+    scenario = delayed_commitment_scenario(11)
+    paraphrased = scenario_with_paraphrase(scenario, "indirect")
+    assert paraphrased.name != scenario.name
+    assert "__qp_indirect" in paraphrased.name
+    assert paraphrased.agent_id != scenario.agent_id
+    assert paraphrased.query != scenario.query
+    assert paraphrased.expected_slots == scenario.expected_slots
+
+
+def test_run_selected_with_paraphrases_expands_variants(memory_service: MemoryService) -> None:
+    results = run_selected(
+        seeds=(11,),
+        families=("time_window_pressure",),
+        paraphrase_styles=("concise", "colloquial"),
+        service=memory_service,
+    )
+    assert len(results) == 2
+    assert all("__qp_" in result.scenario_name for result in results)
+    assert all(result.seed == 11 for result in results)
+
+
+def test_paraphrase_styles_constant_has_expected_styles() -> None:
+    assert set(QUERY_PARAPHRASE_STYLES) == {"concise", "indirect", "colloquial"}

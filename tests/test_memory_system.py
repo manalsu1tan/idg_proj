@@ -117,7 +117,7 @@ def test_context_pack_respects_budget(memory_service: MemoryService) -> None:
 
 
 
-def test_balanced_retrieval_prefers_summary_without_duplicate_leaf_drilldown(memory_service: MemoryService) -> None:
+def test_balanced_retrieval_prefers_leaf_first_when_single_leaf_is_enough(memory_service: MemoryService) -> None:
     base = datetime(2025, 1, 1, 9, 0, 0)
     memory_service.agent_loop.observe(
         "agent-branch",
@@ -141,7 +141,7 @@ def test_balanced_retrieval_prefers_summary_without_duplicate_leaf_drilldown(mem
         branch_limit=2,
     )
     selected_as = {item.selected_as for item in response.retrieved_nodes}
-    assert "summary" in selected_as
+    assert "query_router_flat" in selected_as
     assert response.diagnostics.supporting_leaf_count == 0
 
 
@@ -229,7 +229,116 @@ def test_conflict_queries_descend_for_specific_event_details(memory_service: Mem
     assert any(item.selected_as == "supporting_leaf" for item in response.retrieved_nodes)
 
 
-def test_revision_queries_can_span_multiple_branches(memory_service: MemoryService) -> None:
+def test_cross_event_composition_query_collects_multiple_supporting_leaves(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-composition-coverage",
+        "In 1:1, Avery said they prefer direct feedback.",
+        base,
+        0.83,
+    )
+    memory_service.agent_loop.observe(
+        "agent-composition-coverage",
+        "Later, learned Avery dislikes surprise meetings.",
+        base + timedelta(days=1),
+        0.82,
+    )
+    memory_service.agent_loop.observe(
+        "agent-composition-coverage",
+        "Reflection: with Avery, I should send bullet points in advance.",
+        base + timedelta(days=3),
+        0.9,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-composition-coverage"))
+    response = memory_service.retrieve(
+        agent_id="agent-composition-coverage",
+        query="How should I communicate with Avery given their preferences and dislikes?",
+        query_time=base + timedelta(days=5),
+        mode=QueryMode.BALANCED,
+        token_budget=120,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth >= 2
+    assert response.diagnostics.supporting_leaf_count >= 2
+    packed = response.packed_context.lower()
+    assert "prefer" in packed
+    assert "dislike" in packed
+    assert "should" in packed
+
+
+def test_negation_sensitive_agreement_query_adds_polarity_support(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-negation-coverage",
+        "I did not agree to bring the demo kit for Maria.",
+        base,
+        0.86,
+    )
+    memory_service.agent_loop.observe(
+        "agent-negation-coverage",
+        "I agreed to bring the finished prototype for the Friday demo.",
+        base + timedelta(days=1),
+        0.92,
+    )
+    memory_service.agent_loop.observe(
+        "agent-negation-coverage",
+        "Checklist: do not pack the demo kit; pack the finished prototype.",
+        base + timedelta(days=2),
+        0.88,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-negation-coverage"))
+    response = memory_service.retrieve(
+        agent_id="agent-negation-coverage",
+        query="What did I agree to bring for Maria at the Friday demo?",
+        query_time=base + timedelta(days=4),
+        mode=QueryMode.BALANCED,
+        token_budget=120,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth >= 2
+    assert response.diagnostics.supporting_leaf_count >= 2
+    packed = response.packed_context.lower()
+    assert "finished prototype" in packed
+    assert "maria" in packed
+
+
+def test_delayed_commitment_query_collects_commitment_and_item_details(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-delayed-commitment-coverage",
+        "Met Maria and promised I would bring it for their upcoming request.",
+        base,
+        0.95,
+    )
+    memory_service.agent_loop.observe(
+        "agent-delayed-commitment-coverage",
+        "Follow-up note: for the Friday product demo, the item to bring is the finished prototype.",
+        base,
+        0.9,
+    )
+    memory_service.agent_loop.observe(
+        "agent-delayed-commitment-coverage",
+        "Day 7 routine: reviewed dashboard metrics and ate lunch at the office.",
+        base + timedelta(days=6),
+        0.2,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-delayed-commitment-coverage"))
+    response = memory_service.retrieve(
+        agent_id="agent-delayed-commitment-coverage",
+        query="For the Friday product demo, which item did I commit to bringing for Maria?",
+        query_time=base + timedelta(days=10),
+        mode=QueryMode.BALANCED,
+        token_budget=120,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth >= 2
+    assert response.diagnostics.supporting_leaf_count >= 2
+    packed = response.packed_context.lower()
+    assert "promised" in packed
+    assert "finished prototype" in packed
+
+
+def test_revision_queries_use_leaf_first_when_top_leaf_has_revision_cues(memory_service: MemoryService) -> None:
     base = datetime(2025, 1, 1, 9, 0, 0)
     memory_service.agent_loop.observe("agent-revision", "Committed to shipping the prototype on Thursday.", base, 0.9)
     memory_service.agent_loop.observe("agent-revision", "Updated the plan: the prototype will ship on Friday after extra QA.", base + timedelta(days=3), 0.95)
@@ -243,8 +352,103 @@ def test_revision_queries_can_span_multiple_branches(memory_service: MemoryServi
         token_budget=90,
         branch_limit=3,
     )
-    assert response.diagnostics.branch_count >= 1
-    assert response.diagnostics.supporting_leaf_count >= 1
+    assert response.retrieval_depth == 1
+    assert response.diagnostics.branch_count == 0
+    assert response.diagnostics.supporting_leaf_count == 0
+    assert response.diagnostics.retrieved_node_count <= 2
+    assert all(item.selected_as == "query_router_flat" for item in response.retrieved_nodes)
+    assert "friday" in response.packed_context.lower()
+
+
+def test_revision_queries_expand_when_top_leaf_lacks_override_cues(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe("agent-revision-expand", "Committed to shipping the prototype on Thursday.", base, 0.9)
+    memory_service.agent_loop.observe("agent-revision-expand", "Shipping plan says prototype on Friday after QA.", base + timedelta(days=3), 0.96)
+    memory_service.agent_loop.observe("agent-revision-expand", "Team note confirms Friday launch date.", base + timedelta(days=4), 0.88)
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-revision-expand"))
+    response = memory_service.retrieve(
+        agent_id="agent-revision-expand",
+        query="When is the prototype actually supposed to ship now?",
+        query_time=base + timedelta(days=5),
+        mode=QueryMode.BALANCED,
+        token_budget=90,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth >= 1
+    assert response.diagnostics.branch_count <= 2
+    assert "friday" in response.packed_context.lower()
+
+
+def test_commitment_revision_query_stays_leaf_first_when_latest_leaf_is_sufficient(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe("agent-commitment-revision", "Committed to shipping the prototype on Thursday.", base, 0.9)
+    memory_service.agent_loop.observe(
+        "agent-commitment-revision",
+        "Updated the plan: the prototype will ship on Friday after final QA.",
+        base + timedelta(days=2),
+        0.97,
+    )
+    memory_service.agent_loop.observe(
+        "agent-commitment-revision",
+        "Confirmed Friday is now the current launch date for the prototype.",
+        base + timedelta(days=3),
+        0.9,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-commitment-revision"))
+    response = memory_service.retrieve(
+        agent_id="agent-commitment-revision",
+        query="When is the prototype actually supposed to ship now?",
+        query_time=base + timedelta(days=4),
+        mode=QueryMode.BALANCED,
+        token_budget=90,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth == 1
+    assert response.diagnostics.retrieved_node_count <= 2
+    assert response.diagnostics.branch_count == 0
+    assert all(item.selected_as == "query_router_flat" for item in response.retrieved_nodes)
+    assert "friday" in response.packed_context.lower()
+
+
+def test_revision_query_keeps_leaf_first_when_low_confidence_but_top_leaf_has_cues(
+    memory_service: MemoryService, monkeypatch
+) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    agent_id = "agent-commitment-revision-low-confidence"
+    query = "When is the prototype actually supposed to ship now?"
+    query_time = base + timedelta(days=4)
+    memory_service.agent_loop.observe(
+        agent_id,
+        "Updated launch plan: the prototype now ships Friday after final QA.",
+        base + timedelta(days=2),
+        0.95,
+    )
+    memory_service.agent_loop.observe(
+        agent_id,
+        "Prototype ships Friday after final QA according to the schedule.",
+        base + timedelta(days=2),
+        0.95,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id=agent_id))
+
+    retriever = memory_service.hierarchical_retriever
+    ranked = retriever._rank_leaf_candidates(agent_id, query, query_time)[:2]
+    assert len(ranked) == 2
+    assert retriever._leaf_satisfies_revision_slot_cues(query, ranked[0].node.text)
+    monkeypatch.setattr(retriever, "_is_low_confidence", lambda _: True)
+
+    response = memory_service.retrieve(
+        agent_id=agent_id,
+        query=query,
+        query_time=query_time,
+        mode=QueryMode.BALANCED,
+        token_budget=90,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth == 1
+    assert response.diagnostics.branch_count == 0
+    assert all(item.selected_as == "query_router_flat" for item in response.retrieved_nodes)
+    assert "friday" in response.packed_context.lower()
 
 
 def test_general_query_flat_fallback_is_cheap(memory_service: MemoryService) -> None:
@@ -264,8 +468,79 @@ def test_general_query_flat_fallback_is_cheap(memory_service: MemoryService) -> 
         token_budget=80,
         branch_limit=3,
     )
-    assert response.diagnostics.fallback_used is True
     assert response.diagnostics.retrieved_node_count == 1
+    assert response.diagnostics.summary_node_count == 0
+    assert response.diagnostics.fallback_used or all(
+        item.selected_as == "query_router_flat" for item in response.retrieved_nodes
+    )
+
+
+def test_non_detail_queries_short_circuit_to_leaf_first(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-leaf-first",
+        "Important: Avery consistently prefers written agendas for serious work updates.",
+        base,
+        0.9,
+    )
+    memory_service.agent_loop.observe(
+        "agent-leaf-first",
+        "Recent note: Avery changed office snack preference today.",
+        base + timedelta(days=8),
+        0.35,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-leaf-first"))
+    response = memory_service.retrieve(
+        agent_id="agent-leaf-first",
+        query="Remind me of Avery's stable preference for serious updates.",
+        query_time=base + timedelta(days=10),
+        mode=QueryMode.BALANCED,
+        token_budget=90,
+        branch_limit=3,
+    )
+    assert response.retrieval_depth == 1
+    assert response.diagnostics.retrieved_node_count == 1
+    assert all(item.selected_as == "query_router_flat" for item in response.retrieved_nodes)
+
+
+def test_temporal_latest_queries_avoid_multi_branch_expansion(memory_service: MemoryService) -> None:
+    base = datetime(2025, 1, 1, 9, 0, 0)
+    memory_service.agent_loop.observe(
+        "agent-temporal-cap",
+        "Initial plan: ship the prototype on Tuesday.",
+        base,
+        0.7,
+    )
+    memory_service.agent_loop.observe(
+        "agent-temporal-cap",
+        "Revision: move prototype shipping to Wednesday.",
+        base + timedelta(days=2),
+        0.78,
+    )
+    memory_service.agent_loop.observe(
+        "agent-temporal-cap",
+        "Final decision: ship the prototype on Friday after final QA.",
+        base + timedelta(days=5),
+        0.95,
+    )
+    memory_service.agent_loop.observe(
+        "agent-temporal-cap",
+        "Shared with the team that Friday is the canonical launch date.",
+        base + timedelta(days=6),
+        0.88,
+    )
+    memory_service.build_summaries(BuildSummariesRequest(agent_id="agent-temporal-cap"))
+    response = memory_service.retrieve(
+        agent_id="agent-temporal-cap",
+        query="What is the latest committed ship day for the prototype?",
+        query_time=base + timedelta(days=8),
+        mode=QueryMode.BALANCED,
+        token_budget=120,
+        branch_limit=3,
+    )
+    assert response.diagnostics.branch_count <= 1
+    assert response.diagnostics.retrieved_node_count <= 1
+    assert "friday" in response.packed_context.lower()
 
 
 def test_social_and_identity_clusters_get_wider_summary_cap() -> None:

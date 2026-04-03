@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 ENV_PATH = ROOT_DIR / ".env"
+QUERY_ROUTING_POLICY_PATH = ROOT_DIR / "configs" / "policies" / "query_routing_policy.json"
 
 
 def load_dotenv_file(path: Path = ENV_PATH) -> None:
@@ -22,6 +25,126 @@ def load_dotenv_file(path: Path = ENV_PATH) -> None:
         if value and ((value[0] == value[-1]) and value[0] in {"'", '"'}):
             value = value[1:-1]
         os.environ.setdefault(key, value)
+
+
+def _default_query_routing_policy() -> dict[str, Any]:
+    return {
+        "feature_triggers": {
+            "temporal_cue": [
+                "latest",
+                "updated",
+                "changed",
+                "revision",
+                "current",
+                "now",
+                "ship",
+                "launch",
+                "when",
+                "actually",
+            ],
+            "conflict_cue": [
+                "conflict",
+                "argument",
+                "fight",
+                "tension",
+                "issue",
+                "problem",
+                "clash",
+                "with whom",
+                "who was involved",
+            ],
+            "composition_cue": [
+                "based on what i know",
+                "given their",
+                "preferences and dislikes",
+                "and dislikes",
+                "using what i already know",
+                "communicate",
+                "communication",
+                "talk",
+                "message",
+                "preference",
+                "prefer",
+                "dislike",
+                "avoid",
+                "what am i bringing for",
+                "what did i say i'd bring for",
+                "which item",
+                "commit",
+                "bringing",
+            ],
+            "negation_cue": [
+                "not",
+                "never",
+                "don't",
+                "didn't",
+                "did not",
+                "do not",
+                "agree to bring",
+                "agreed to bring",
+                "pack",
+            ],
+            "entity_ambiguity_cue": [
+                "alias",
+                "pronoun",
+                "he",
+                "she",
+                "they",
+                "him",
+                "her",
+                "different person",
+                "same name",
+                "who exactly",
+                "which person",
+                "whom",
+                "describe",
+                "identity",
+                "role",
+                "presenting",
+                "facilitation",
+            ],
+        },
+        "feature_norms": {
+            "temporal_cue": 3.0,
+            "conflict_cue": 2.0,
+            "composition_cue": 3.0,
+            "negation_cue": 2.0,
+            "entity_ambiguity_cue": 3.0,
+        },
+        "feature_weights": {
+            "temporal_cue": 1.0,
+            "conflict_cue": 1.0,
+            "composition_cue": 1.0,
+            "negation_cue": 1.0,
+            "entity_ambiguity_cue": 1.0,
+        },
+        "strategy_thresholds": {
+            "flat_top1_max": 0.32,
+            "revision_leaf_min": 0.45,
+            "coverage_min": 0.45,
+            "hierarchy_expand_min": 0.48,
+            "multi_branch_min": 0.65,
+            "feature_active_min": 0.34,
+        },
+    }
+
+
+def load_query_routing_policy(path: Path = QUERY_ROUTING_POLICY_PATH) -> dict[str, Any]:
+    if not path.exists():
+        return _default_query_routing_policy()
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return _default_query_routing_policy()
+    if not isinstance(payload, dict):
+        return _default_query_routing_policy()
+    baseline = _default_query_routing_policy()
+    merged = dict(baseline)
+    for key in ("feature_triggers", "feature_norms", "feature_weights", "strategy_thresholds"):
+        value = payload.get(key)
+        if isinstance(value, dict):
+            merged[key] = value
+    return merged
 
 
 @dataclass(frozen=True)
@@ -44,6 +167,14 @@ class Settings:
     embedding_dimensions: int = field(default_factory=lambda: int(os.getenv("PROJECT_EMBEDDING_DIMENSIONS", "12")))
     summary_max_tokens: int = field(default_factory=lambda: int(os.getenv("PROJECT_SUMMARY_MAX_TOKENS", "18")))
     social_summary_max_tokens: int = field(default_factory=lambda: int(os.getenv("PROJECT_SOCIAL_SUMMARY_MAX_TOKENS", "24")))
+    query_routing_policy_path: str = field(
+        default_factory=lambda: os.getenv("PROJECT_QUERY_ROUTING_POLICY_PATH", str(QUERY_ROUTING_POLICY_PATH))
+    )
+    query_routing_policy: dict[str, Any] = field(
+        default_factory=lambda: load_query_routing_policy(
+            Path(os.getenv("PROJECT_QUERY_ROUTING_POLICY_PATH", str(QUERY_ROUTING_POLICY_PATH)))
+        )
+    )
     auto_create_schema: bool = field(default_factory=lambda: os.getenv("PROJECT_AUTO_CREATE_SCHEMA", "true").lower() == "true")
     ui_enabled: bool = field(default_factory=lambda: os.getenv("PROJECT_UI_ENABLED", "true").lower() == "true")
 
