@@ -31,6 +31,8 @@ def build_model_client(settings: Settings) -> tuple[ModelClient, ModelProvider]:
                 base_url=settings.model_base_url,
                 api_key=settings.model_api_key,
                 timeout_seconds=settings.model_timeout_seconds,
+                max_retries=max(0, settings.model_max_retries),
+                retry_backoff_seconds=max(0.0, settings.model_retry_backoff_seconds),
             ),
             ModelProvider.OPENAI_COMPATIBLE,
         )

@@ -62,6 +62,21 @@ To run retrieval-regime ablations and export an ablation report, use [`export_ab
 ./scripts/export_ablation_report.sh
 ```
 
+To run a larger policy sweep and export a Pareto frontier report, use [`run_frontier_sweep.sh`](/Users/Manal/Documents/GitHub/idg_proj/scripts/run_frontier_sweep.sh):
+
+```bash
+PROJECT_MODEL_PROVIDER=mock ./scripts/run_frontier_sweep.sh --max-candidates 200 --sample-method lhs
+```
+
+The frontier sweep now optimizes over multi-slice objectives by default:
+
+- canonical seeds
+- unseen seeds (`+100` offsets)
+- hard query perturbations (`concise`, `indirect`, `colloquial`, `typo_noise`, `word_order`, `entity_swap_distractor`)
+- family-level objectives (`multi_person_interference` slot gain, `time_window_pressure` token delta)
+
+This writes JSON and Markdown frontier artifacts under [`reports/`](/Users/Manal/Documents/GitHub/idg_proj/reports).
+
 ## Real model provider
 
 The repository now targets a real OpenAI-compatible endpoint by default in `.env.example`.

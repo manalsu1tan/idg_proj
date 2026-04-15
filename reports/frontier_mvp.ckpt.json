@@ -1,0 +1,243 @@
+{
+  "format_version": 1,
+  "created_at": "2026-04-09T14:35:17.923894+00:00",
+  "config_signature": "dfabb0736de682121fbf18dac3cf3e30071563262cecb891496565855a383ca1",
+  "config": {
+    "seeds": [
+      11,
+      23,
+      37,
+      53
+    ],
+    "families": null,
+    "dimensions": [
+      {
+        "key": "resolver_thresholds.competing_person_score_gap",
+        "min": 0.1,
+        "max": 0.4,
+        "type": "float"
+      },
+      {
+        "key": "resolver_thresholds.competing_person_score_ratio",
+        "min": 0.45,
+        "max": 0.75,
+        "type": "float"
+      },
+      {
+        "key": "resolver_thresholds.competing_person_window",
+        "min": 4.0,
+        "max": 12.0,
+        "type": "int"
+      },
+      {
+        "key": "resolver_thresholds.disambiguation_close_margin",
+        "min": 0.04,
+        "max": 0.16,
+        "type": "float"
+      },
+      {
+        "key": "resolver_thresholds.expansion_branch_target",
+        "min": 2.0,
+        "max": 4.0,
+        "type": "int"
+      },
+      {
+        "key": "resolver_thresholds.low_confidence_margin",
+        "min": 0.04,
+        "max": 0.16,
+        "type": "float"
+      },
+      {
+        "key": "strategy_thresholds.coverage_min",
+        "min": 0.34,
+        "max": 0.58,
+        "type": "float"
+      },
+      {
+        "key": "strategy_thresholds.feature_active_min",
+        "min": 0.24,
+        "max": 0.44,
+        "type": "float"
+      },
+      {
+        "key": "strategy_thresholds.hierarchy_expand_min",
+        "min": 0.38,
+        "max": 0.62,
+        "type": "float"
+      },
+      {
+        "key": "strategy_thresholds.multi_branch_min",
+        "min": 0.52,
+        "max": 0.78,
+        "type": "float"
+      },
+      {
+        "key": "strategy_thresholds.revision_leaf_min",
+        "min": 0.34,
+        "max": 0.58,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.base_utility_threshold",
+        "min": 0.03,
+        "max": 0.14,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.communication_gap_relax",
+        "min": 0.0,
+        "max": 0.05,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.disambiguation_relax",
+        "min": 0.0,
+        "max": 0.07,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.low_confidence_relax",
+        "min": 0.0,
+        "max": 0.03,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.max_utility_threshold",
+        "min": 0.1,
+        "max": 0.24,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.min_utility_threshold",
+        "min": 0.01,
+        "max": 0.08,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.missing_required_relax",
+        "min": 0.0,
+        "max": 0.05,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.polarity_relax",
+        "min": 0.0,
+        "max": 0.05,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_thresholds.temporal_only_penalty",
+        "min": 0.0,
+        "max": 0.08,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_weights.communication_bonus",
+        "min": 0.04,
+        "max": 0.18,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_weights.coverage_bonus_per_key",
+        "min": 0.02,
+        "max": 0.12,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_weights.disambiguation_bonus",
+        "min": 0.04,
+        "max": 0.18,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_weights.entity_aligned_bonus",
+        "min": 0.0,
+        "max": 0.08,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_weights.polarity_bonus",
+        "min": 0.04,
+        "max": 0.18,
+        "type": "float"
+      },
+      {
+        "key": "supplemental_weights.required_bonus_per_key",
+        "min": 0.06,
+        "max": 0.22,
+        "type": "float"
+      }
+    ],
+    "max_candidates": 48,
+    "sample_method": "lhs",
+    "optimization_random_seeds": [
+      7,
+      8,
+      9
+    ],
+    "slices": [
+      {
+        "name": "canonical",
+        "weight": 0.5,
+        "seeds": [
+          11,
+          23,
+          37,
+          53
+        ],
+        "perturbation_styles": []
+      },
+      {
+        "name": "unseen_seeds",
+        "weight": 0.25,
+        "seeds": [
+          111,
+          123,
+          137,
+          153
+        ],
+        "perturbation_styles": []
+      },
+      {
+        "name": "hard_perturbations",
+        "weight": 0.25,
+        "seeds": [
+          11,
+          23,
+          37,
+          53
+        ],
+        "perturbation_styles": [
+          "concise",
+          "indirect",
+          "typo_noise"
+        ]
+      }
+    ],
+    "family_objectives": [
+      {
+        "family": "multi_person_interference",
+        "metric": "slot_gain",
+        "direction": "max"
+      },
+      {
+        "family": "time_window_pressure",
+        "metric": "token_delta",
+        "direction": "max"
+      }
+    ],
+    "quick_scenarios": false,
+    "scenario_limit": 36,
+    "pareto_epsilon": 0.0001
+  },
+  "runs": [
+    {
+      "run_index": 0,
+      "random_seed": 7,
+      "status": "in_progress",
+      "completed_candidates": {},
+      "updated_at": "2026-04-09T14:35:17.924418+00:00"
+    }
+  ],
+  "updated_at": "2026-04-09T14:35:17.924420+00:00"
+}

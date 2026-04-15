@@ -1,0 +1,3372 @@
+{
+  "exported_at": "2026-04-09T14:33:14.275818+00:00",
+  "report_type": "frontier_sweep_report",
+  "summary": {
+    "candidate_count": 3,
+    "frontier_count": 3,
+    "sample_method": "lhs",
+    "max_candidates_requested": 2,
+    "random_seed": 7,
+    "optimization_run_count": 1,
+    "optimization_random_seeds": [
+      7
+    ],
+    "quick_scenarios": true,
+    "scenario_limit": 2,
+    "pareto_epsilon": 0.0001,
+    "mode_match_threshold": 0.18,
+    "slice_names": [
+      "canonical",
+      "unseen_seeds",
+      "hard_perturbations"
+    ],
+    "families": null,
+    "objective_key_count": 10,
+    "global_slot_gain_mean": 0.15625,
+    "global_keyword_gain_mean": 0.12499999999999996,
+    "global_token_delta_mean": -3.75
+  },
+  "slices": [
+    {
+      "name": "canonical",
+      "weight": 0.5,
+      "seeds": [
+        11
+      ],
+      "perturbation_styles": []
+    },
+    {
+      "name": "unseen_seeds",
+      "weight": 0.25,
+      "seeds": [
+        111
+      ],
+      "perturbation_styles": []
+    },
+    {
+      "name": "hard_perturbations",
+      "weight": 0.25,
+      "seeds": [
+        11
+      ],
+      "perturbation_styles": [
+        "concise",
+        "indirect",
+        "typo_noise"
+      ]
+    }
+  ],
+  "dimensions": [
+    {
+      "key": "resolver_thresholds.competing_person_score_gap",
+      "min": 0.1,
+      "max": 0.4,
+      "type": "float"
+    },
+    {
+      "key": "resolver_thresholds.competing_person_score_ratio",
+      "min": 0.45,
+      "max": 0.75,
+      "type": "float"
+    },
+    {
+      "key": "resolver_thresholds.competing_person_window",
+      "min": 4.0,
+      "max": 12.0,
+      "type": "int"
+    },
+    {
+      "key": "resolver_thresholds.disambiguation_close_margin",
+      "min": 0.04,
+      "max": 0.16,
+      "type": "float"
+    },
+    {
+      "key": "resolver_thresholds.expansion_branch_target",
+      "min": 2.0,
+      "max": 4.0,
+      "type": "int"
+    },
+    {
+      "key": "resolver_thresholds.low_confidence_margin",
+      "min": 0.04,
+      "max": 0.16,
+      "type": "float"
+    },
+    {
+      "key": "strategy_thresholds.coverage_min",
+      "min": 0.34,
+      "max": 0.58,
+      "type": "float"
+    },
+    {
+      "key": "strategy_thresholds.feature_active_min",
+      "min": 0.24,
+      "max": 0.44,
+      "type": "float"
+    },
+    {
+      "key": "strategy_thresholds.hierarchy_expand_min",
+      "min": 0.38,
+      "max": 0.62,
+      "type": "float"
+    },
+    {
+      "key": "strategy_thresholds.multi_branch_min",
+      "min": 0.52,
+      "max": 0.78,
+      "type": "float"
+    },
+    {
+      "key": "strategy_thresholds.revision_leaf_min",
+      "min": 0.34,
+      "max": 0.58,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.base_utility_threshold",
+      "min": 0.03,
+      "max": 0.14,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.communication_gap_relax",
+      "min": 0.0,
+      "max": 0.05,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.disambiguation_relax",
+      "min": 0.0,
+      "max": 0.07,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.low_confidence_relax",
+      "min": 0.0,
+      "max": 0.03,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.max_utility_threshold",
+      "min": 0.1,
+      "max": 0.24,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.min_utility_threshold",
+      "min": 0.01,
+      "max": 0.08,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.missing_required_relax",
+      "min": 0.0,
+      "max": 0.05,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.polarity_relax",
+      "min": 0.0,
+      "max": 0.05,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_thresholds.temporal_only_penalty",
+      "min": 0.0,
+      "max": 0.08,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_weights.communication_bonus",
+      "min": 0.04,
+      "max": 0.18,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_weights.coverage_bonus_per_key",
+      "min": 0.02,
+      "max": 0.12,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_weights.disambiguation_bonus",
+      "min": 0.04,
+      "max": 0.18,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_weights.entity_aligned_bonus",
+      "min": 0.0,
+      "max": 0.08,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_weights.polarity_bonus",
+      "min": 0.04,
+      "max": 0.18,
+      "type": "float"
+    },
+    {
+      "key": "supplemental_weights.required_bonus_per_key",
+      "min": 0.06,
+      "max": 0.22,
+      "type": "float"
+    }
+  ],
+  "family_objectives": [
+    {
+      "family": "multi_person_interference",
+      "metric": "slot_gain",
+      "direction": "max"
+    },
+    {
+      "family": "time_window_pressure",
+      "metric": "token_delta",
+      "direction": "max"
+    }
+  ],
+  "frontier_candidate_ids": [
+    "baseline",
+    "candidate_0001",
+    "candidate_0002"
+  ],
+  "stability_report": {
+    "mode_count": 1,
+    "mode_match_threshold": 0.18,
+    "runs": [
+      {
+        "run_index": 0,
+        "random_seed": 7,
+        "frontier_size": 3,
+        "frontier_mode_ids": [
+          "mode_01"
+        ],
+        "frontier_candidates": [
+          {
+            "candidate_id": "baseline",
+            "mode_id": "mode_01",
+            "utility_score": 0.49999999999999994
+          },
+          {
+            "candidate_id": "candidate_0001",
+            "mode_id": "mode_01",
+            "utility_score": 0.49999999999999994
+          },
+          {
+            "candidate_id": "candidate_0002",
+            "mode_id": "mode_01",
+            "utility_score": 0.49999999999999994
+          }
+        ]
+      }
+    ],
+    "modes": [
+      {
+        "mode_id": "mode_01",
+        "appearance_count": 1,
+        "appearance_rate": 1.0,
+        "candidate_occurrence_count": 3,
+        "run_indices": [
+          0
+        ],
+        "random_seeds": [
+          7
+        ],
+        "centroid_objectives": {
+          "global.slot_gain": 0.15625,
+          "global.keyword_gain": 0.12499999999999997,
+          "global.hierarchy_win_rate": 0.625,
+          "global.token_delta": -3.75,
+          "family.multi_person_interference.slot_gain.max": 0.0
+        },
+        "representative": {
+          "run_index": 0,
+          "random_seed": 7,
+          "candidate_id": "baseline",
+          "utility_score": 0.49999999999999994,
+          "objective_vector": {
+            "global.slot_gain": 0.15625,
+            "global.keyword_gain": 0.12499999999999997,
+            "global.hierarchy_win_rate": 0.625,
+            "global.token_delta": -3.75,
+            "global.slot_per_token_gain": -0.004854910714285716,
+            "global.flat_win_penalty": -0.0,
+            "robust.worst_slot_gain": 0.125,
+            "robust.worst_keyword_gain": 0.09999999999999998,
+            "family.multi_person_interference.slot_gain.max": 0.0,
+            "family.time_window_pressure.token_delta.max": 0.0
+          }
+        },
+        "metric_movement": {
+          "global.slot_gain": {
+            "mean": 0.15625,
+            "stddev": 0.0,
+            "min": 0.15625,
+            "max": 0.15625,
+            "range": 0.0
+          },
+          "global.keyword_gain": {
+            "mean": 0.12499999999999996,
+            "stddev": 0.0,
+            "min": 0.12499999999999997,
+            "max": 0.12499999999999997,
+            "range": 0.0
+          },
+          "global.hierarchy_win_rate": {
+            "mean": 0.625,
+            "stddev": 0.0,
+            "min": 0.625,
+            "max": 0.625,
+            "range": 0.0
+          },
+          "global.token_delta": {
+            "mean": -3.75,
+            "stddev": 0.0,
+            "min": -3.75,
+            "max": -3.75,
+            "range": 0.0
+          },
+          "family.multi_person_interference.slot_gain.max": {
+            "mean": 0.0,
+            "stddev": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "range": 0.0
+          }
+        }
+      }
+    ],
+    "pairwise_mode_jaccard": [],
+    "average_pairwise_mode_jaccard": 1.0
+  },
+  "optimization_runs": [
+    {
+      "run_index": 0,
+      "random_seed": 7,
+      "candidate_count": 3,
+      "frontier_count": 3,
+      "frontier_candidate_ids": [
+        "baseline",
+        "candidate_0001",
+        "candidate_0002"
+      ],
+      "frontier_candidates": [
+        {
+          "candidate_id": "baseline",
+          "is_frontier": true,
+          "utility_score": 0.49999999999999994,
+          "overrides": {},
+          "objective_vector": {
+            "global.slot_gain": 0.15625,
+            "global.keyword_gain": 0.12499999999999997,
+            "global.hierarchy_win_rate": 0.625,
+            "global.token_delta": -3.75,
+            "global.slot_per_token_gain": -0.004854910714285716,
+            "global.flat_win_penalty": -0.0,
+            "robust.worst_slot_gain": 0.125,
+            "robust.worst_keyword_gain": 0.09999999999999998,
+            "family.multi_person_interference.slot_gain.max": 0.0,
+            "family.time_window_pressure.token_delta.max": 0.0
+          },
+          "objective_seed_statistics": {
+            "global.slot_gain": {
+              "seed_count_effective": 3,
+              "mean": 0.15625,
+              "stderr": 0.0,
+              "ci95_low": 0.15625,
+              "ci95_high": 0.15625
+            },
+            "global.keyword_gain": {
+              "seed_count_effective": 3,
+              "mean": 0.12499999999999997,
+              "stderr": 0.0,
+              "ci95_low": 0.12499999999999997,
+              "ci95_high": 0.12499999999999997
+            },
+            "global.hierarchy_win_rate": {
+              "seed_count_effective": 3,
+              "mean": 0.625,
+              "stderr": 0.0,
+              "ci95_low": 0.625,
+              "ci95_high": 0.625
+            },
+            "global.token_delta": {
+              "seed_count_effective": 3,
+              "mean": -3.75,
+              "stderr": 0.0,
+              "ci95_low": -3.75,
+              "ci95_high": -3.75
+            },
+            "global.slot_per_token_gain": {
+              "seed_count_effective": 3,
+              "mean": -0.004854910714285716,
+              "stderr": 0.0,
+              "ci95_low": -0.004854910714285716,
+              "ci95_high": -0.004854910714285716
+            },
+            "global.flat_win_penalty": {
+              "seed_count_effective": 3,
+              "mean": -0.0,
+              "stderr": 0.0,
+              "ci95_low": -0.0,
+              "ci95_high": -0.0
+            }
+          },
+          "slice_summaries": {
+            "canonical": {
+              "avg_slot_recall_gain": 0.125,
+              "avg_keyword_recall_gain": 0.09999999999999998,
+              "hierarchy_win_rate": 0.5,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.5,
+              "avg_retrieved_token_delta": -3.0,
+              "avg_slot_recall_per_token_gain": -0.004464285714285716
+            },
+            "unseen_seeds": {
+              "avg_slot_recall_gain": 0.125,
+              "avg_keyword_recall_gain": 0.09999999999999998,
+              "hierarchy_win_rate": 0.5,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.5,
+              "avg_retrieved_token_delta": -3.0,
+              "avg_slot_recall_per_token_gain": -0.0015625000000000014
+            },
+            "hard_perturbations": {
+              "avg_slot_recall_gain": 0.25,
+              "avg_keyword_recall_gain": 0.19999999999999996,
+              "hierarchy_win_rate": 1.0,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.0,
+              "avg_retrieved_token_delta": -6.0,
+              "avg_slot_recall_per_token_gain": -0.008928571428571432
+            }
+          },
+          "slice_seed_statistics": {
+            "canonical": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.125,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.125,
+                "ci95_high": 0.125,
+                "min": 0.125,
+                "max": 0.125,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.125
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.09999999999999998,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.09999999999999998,
+                "ci95_high": 0.09999999999999998,
+                "min": 0.09999999999999998,
+                "max": 0.09999999999999998,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.09999999999999998
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -3.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -3.0,
+                "ci95_high": -3.0,
+                "min": -3.0,
+                "max": -3.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -3.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.004464285714285716,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.004464285714285716,
+                "ci95_high": -0.004464285714285716,
+                "min": -0.004464285714285716,
+                "max": -0.004464285714285716,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -0.004464285714285716
+                  }
+                ]
+              }
+            },
+            "unseen_seeds": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.125,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.125,
+                "ci95_high": 0.125,
+                "min": 0.125,
+                "max": 0.125,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.125
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.09999999999999998,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.09999999999999998,
+                "ci95_high": 0.09999999999999998,
+                "min": 0.09999999999999998,
+                "max": 0.09999999999999998,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.09999999999999998
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -3.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -3.0,
+                "ci95_high": -3.0,
+                "min": -3.0,
+                "max": -3.0,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": -3.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.0015625000000000014,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.0015625000000000014,
+                "ci95_high": -0.0015625000000000014,
+                "min": -0.0015625000000000014,
+                "max": -0.0015625000000000014,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": -0.0015625000000000014
+                  }
+                ]
+              }
+            },
+            "hard_perturbations": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.25,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.25,
+                "ci95_high": 0.25,
+                "min": 0.25,
+                "max": 0.25,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.25
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.19999999999999996,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.19999999999999996,
+                "ci95_high": 0.19999999999999996,
+                "min": 0.19999999999999996,
+                "max": 0.19999999999999996,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.19999999999999996
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 1.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 1.0,
+                "ci95_high": 1.0,
+                "min": 1.0,
+                "max": 1.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 1.0
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -6.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -6.0,
+                "ci95_high": -6.0,
+                "min": -6.0,
+                "max": -6.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -6.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.008928571428571432,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.008928571428571432,
+                "ci95_high": -0.008928571428571432,
+                "min": -0.008928571428571432,
+                "max": -0.008928571428571432,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -0.008928571428571432
+                  }
+                ]
+              }
+            }
+          },
+          "family_slice_metrics": {
+            "canonical": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              },
+              "temporal_override_chain": {
+                "avg_slot_recall_gain": 0.0,
+                "avg_keyword_recall_gain": 0.0,
+                "avg_retrieved_token_delta": 0.0,
+                "hierarchy_win_rate": 0.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 1.0
+              }
+            },
+            "unseen_seeds": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              },
+              "temporal_override_chain": {
+                "avg_slot_recall_gain": 0.0,
+                "avg_keyword_recall_gain": 0.0,
+                "avg_retrieved_token_delta": 0.0,
+                "hierarchy_win_rate": 0.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 1.0
+              }
+            },
+            "hard_perturbations": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              }
+            }
+          },
+          "stability_mode_id": "mode_01"
+        },
+        {
+          "candidate_id": "candidate_0001",
+          "is_frontier": true,
+          "utility_score": 0.49999999999999994,
+          "overrides": {
+            "resolver_thresholds.competing_person_score_gap": 0.24218,
+            "resolver_thresholds.competing_person_score_ratio": 0.610865,
+            "resolver_thresholds.competing_person_window": 6.0,
+            "resolver_thresholds.disambiguation_close_margin": 0.10225,
+            "resolver_thresholds.expansion_branch_target": 3.0,
+            "resolver_thresholds.low_confidence_margin": 0.149611,
+            "strategy_thresholds.coverage_min": 0.535675,
+            "strategy_thresholds.feature_active_min": 0.39771,
+            "strategy_thresholds.hierarchy_expand_min": 0.50559,
+            "strategy_thresholds.multi_branch_min": 0.574488,
+            "strategy_thresholds.revision_leaf_min": 0.407231,
+            "supplemental_thresholds.base_utility_threshold": 0.116988,
+            "supplemental_thresholds.communication_gap_relax": 0.002436,
+            "supplemental_thresholds.disambiguation_relax": 0.056665,
+            "supplemental_thresholds.low_confidence_relax": 0.011658,
+            "supplemental_thresholds.max_utility_threshold": 0.125311,
+            "supplemental_thresholds.min_utility_threshold": 0.069465,
+            "supplemental_thresholds.missing_required_relax": 0.01313,
+            "supplemental_thresholds.polarity_relax": 0.007198,
+            "supplemental_thresholds.temporal_only_penalty": 0.060477,
+            "supplemental_weights.communication_bonus": 0.050639,
+            "supplemental_weights.coverage_bonus_per_key": 0.118101,
+            "supplemental_weights.disambiguation_bonus": 0.063809,
+            "supplemental_weights.entity_aligned_bonus": 0.023196,
+            "supplemental_weights.polarity_bonus": 0.176128,
+            "supplemental_weights.required_bonus_per_key": 0.144854
+          },
+          "objective_vector": {
+            "global.slot_gain": 0.15625,
+            "global.keyword_gain": 0.12499999999999997,
+            "global.hierarchy_win_rate": 0.625,
+            "global.token_delta": -3.75,
+            "global.slot_per_token_gain": -0.004854910714285716,
+            "global.flat_win_penalty": -0.0,
+            "robust.worst_slot_gain": 0.125,
+            "robust.worst_keyword_gain": 0.09999999999999998,
+            "family.multi_person_interference.slot_gain.max": 0.0,
+            "family.time_window_pressure.token_delta.max": 0.0
+          },
+          "objective_seed_statistics": {
+            "global.slot_gain": {
+              "seed_count_effective": 3,
+              "mean": 0.15625,
+              "stderr": 0.0,
+              "ci95_low": 0.15625,
+              "ci95_high": 0.15625
+            },
+            "global.keyword_gain": {
+              "seed_count_effective": 3,
+              "mean": 0.12499999999999997,
+              "stderr": 0.0,
+              "ci95_low": 0.12499999999999997,
+              "ci95_high": 0.12499999999999997
+            },
+            "global.hierarchy_win_rate": {
+              "seed_count_effective": 3,
+              "mean": 0.625,
+              "stderr": 0.0,
+              "ci95_low": 0.625,
+              "ci95_high": 0.625
+            },
+            "global.token_delta": {
+              "seed_count_effective": 3,
+              "mean": -3.75,
+              "stderr": 0.0,
+              "ci95_low": -3.75,
+              "ci95_high": -3.75
+            },
+            "global.slot_per_token_gain": {
+              "seed_count_effective": 3,
+              "mean": -0.004854910714285716,
+              "stderr": 0.0,
+              "ci95_low": -0.004854910714285716,
+              "ci95_high": -0.004854910714285716
+            },
+            "global.flat_win_penalty": {
+              "seed_count_effective": 3,
+              "mean": -0.0,
+              "stderr": 0.0,
+              "ci95_low": -0.0,
+              "ci95_high": -0.0
+            }
+          },
+          "slice_summaries": {
+            "canonical": {
+              "avg_slot_recall_gain": 0.125,
+              "avg_keyword_recall_gain": 0.09999999999999998,
+              "hierarchy_win_rate": 0.5,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.5,
+              "avg_retrieved_token_delta": -3.0,
+              "avg_slot_recall_per_token_gain": -0.004464285714285716
+            },
+            "unseen_seeds": {
+              "avg_slot_recall_gain": 0.125,
+              "avg_keyword_recall_gain": 0.09999999999999998,
+              "hierarchy_win_rate": 0.5,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.5,
+              "avg_retrieved_token_delta": -3.0,
+              "avg_slot_recall_per_token_gain": -0.0015625000000000014
+            },
+            "hard_perturbations": {
+              "avg_slot_recall_gain": 0.25,
+              "avg_keyword_recall_gain": 0.19999999999999996,
+              "hierarchy_win_rate": 1.0,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.0,
+              "avg_retrieved_token_delta": -6.0,
+              "avg_slot_recall_per_token_gain": -0.008928571428571432
+            }
+          },
+          "slice_seed_statistics": {
+            "canonical": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.125,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.125,
+                "ci95_high": 0.125,
+                "min": 0.125,
+                "max": 0.125,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.125
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.09999999999999998,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.09999999999999998,
+                "ci95_high": 0.09999999999999998,
+                "min": 0.09999999999999998,
+                "max": 0.09999999999999998,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.09999999999999998
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -3.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -3.0,
+                "ci95_high": -3.0,
+                "min": -3.0,
+                "max": -3.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -3.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.004464285714285716,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.004464285714285716,
+                "ci95_high": -0.004464285714285716,
+                "min": -0.004464285714285716,
+                "max": -0.004464285714285716,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -0.004464285714285716
+                  }
+                ]
+              }
+            },
+            "unseen_seeds": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.125,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.125,
+                "ci95_high": 0.125,
+                "min": 0.125,
+                "max": 0.125,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.125
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.09999999999999998,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.09999999999999998,
+                "ci95_high": 0.09999999999999998,
+                "min": 0.09999999999999998,
+                "max": 0.09999999999999998,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.09999999999999998
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -3.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -3.0,
+                "ci95_high": -3.0,
+                "min": -3.0,
+                "max": -3.0,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": -3.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.0015625000000000014,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.0015625000000000014,
+                "ci95_high": -0.0015625000000000014,
+                "min": -0.0015625000000000014,
+                "max": -0.0015625000000000014,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": -0.0015625000000000014
+                  }
+                ]
+              }
+            },
+            "hard_perturbations": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.25,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.25,
+                "ci95_high": 0.25,
+                "min": 0.25,
+                "max": 0.25,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.25
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.19999999999999996,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.19999999999999996,
+                "ci95_high": 0.19999999999999996,
+                "min": 0.19999999999999996,
+                "max": 0.19999999999999996,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.19999999999999996
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 1.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 1.0,
+                "ci95_high": 1.0,
+                "min": 1.0,
+                "max": 1.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 1.0
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -6.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -6.0,
+                "ci95_high": -6.0,
+                "min": -6.0,
+                "max": -6.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -6.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.008928571428571432,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.008928571428571432,
+                "ci95_high": -0.008928571428571432,
+                "min": -0.008928571428571432,
+                "max": -0.008928571428571432,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -0.008928571428571432
+                  }
+                ]
+              }
+            }
+          },
+          "family_slice_metrics": {
+            "canonical": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              },
+              "temporal_override_chain": {
+                "avg_slot_recall_gain": 0.0,
+                "avg_keyword_recall_gain": 0.0,
+                "avg_retrieved_token_delta": 0.0,
+                "hierarchy_win_rate": 0.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 1.0
+              }
+            },
+            "unseen_seeds": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              },
+              "temporal_override_chain": {
+                "avg_slot_recall_gain": 0.0,
+                "avg_keyword_recall_gain": 0.0,
+                "avg_retrieved_token_delta": 0.0,
+                "hierarchy_win_rate": 0.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 1.0
+              }
+            },
+            "hard_perturbations": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              }
+            }
+          },
+          "stability_mode_id": "mode_01"
+        },
+        {
+          "candidate_id": "candidate_0002",
+          "is_frontier": true,
+          "utility_score": 0.49999999999999994,
+          "overrides": {
+            "resolver_thresholds.competing_person_score_gap": 0.309224,
+            "resolver_thresholds.competing_person_score_ratio": 0.530382,
+            "resolver_thresholds.competing_person_window": 12.0,
+            "resolver_thresholds.disambiguation_close_margin": 0.066019,
+            "resolver_thresholds.expansion_branch_target": 3.0,
+            "resolver_thresholds.low_confidence_margin": 0.047428,
+            "strategy_thresholds.coverage_min": 0.40996,
+            "strategy_thresholds.feature_active_min": 0.279668,
+            "strategy_thresholds.hierarchy_expand_min": 0.483016,
+            "strategy_thresholds.multi_branch_min": 0.720289,
+            "strategy_thresholds.revision_leaf_min": 0.54184,
+            "supplemental_thresholds.base_utility_threshold": 0.06514,
+            "supplemental_thresholds.communication_gap_relax": 0.042803,
+            "supplemental_thresholds.disambiguation_relax": 0.017375,
+            "supplemental_thresholds.low_confidence_relax": 0.021984,
+            "supplemental_thresholds.max_utility_threshold": 0.18739,
+            "supplemental_thresholds.min_utility_threshold": 0.018543,
+            "supplemental_thresholds.missing_required_relax": 0.046878,
+            "supplemental_thresholds.polarity_relax": 0.049504,
+            "supplemental_thresholds.temporal_only_penalty": 0.006598,
+            "supplemental_weights.communication_bonus": 0.144227,
+            "supplemental_weights.coverage_bonus_per_key": 0.023881,
+            "supplemental_weights.disambiguation_bonus": 0.134512,
+            "supplemental_weights.entity_aligned_bonus": 0.058248,
+            "supplemental_weights.polarity_bonus": 0.073187,
+            "supplemental_weights.required_bonus_per_key": 0.116119
+          },
+          "objective_vector": {
+            "global.slot_gain": 0.15625,
+            "global.keyword_gain": 0.12499999999999997,
+            "global.hierarchy_win_rate": 0.625,
+            "global.token_delta": -3.75,
+            "global.slot_per_token_gain": -0.004854910714285716,
+            "global.flat_win_penalty": -0.0,
+            "robust.worst_slot_gain": 0.125,
+            "robust.worst_keyword_gain": 0.09999999999999998,
+            "family.multi_person_interference.slot_gain.max": 0.0,
+            "family.time_window_pressure.token_delta.max": 0.0
+          },
+          "objective_seed_statistics": {
+            "global.slot_gain": {
+              "seed_count_effective": 3,
+              "mean": 0.15625,
+              "stderr": 0.0,
+              "ci95_low": 0.15625,
+              "ci95_high": 0.15625
+            },
+            "global.keyword_gain": {
+              "seed_count_effective": 3,
+              "mean": 0.12499999999999997,
+              "stderr": 0.0,
+              "ci95_low": 0.12499999999999997,
+              "ci95_high": 0.12499999999999997
+            },
+            "global.hierarchy_win_rate": {
+              "seed_count_effective": 3,
+              "mean": 0.625,
+              "stderr": 0.0,
+              "ci95_low": 0.625,
+              "ci95_high": 0.625
+            },
+            "global.token_delta": {
+              "seed_count_effective": 3,
+              "mean": -3.75,
+              "stderr": 0.0,
+              "ci95_low": -3.75,
+              "ci95_high": -3.75
+            },
+            "global.slot_per_token_gain": {
+              "seed_count_effective": 3,
+              "mean": -0.004854910714285716,
+              "stderr": 0.0,
+              "ci95_low": -0.004854910714285716,
+              "ci95_high": -0.004854910714285716
+            },
+            "global.flat_win_penalty": {
+              "seed_count_effective": 3,
+              "mean": -0.0,
+              "stderr": 0.0,
+              "ci95_low": -0.0,
+              "ci95_high": -0.0
+            }
+          },
+          "slice_summaries": {
+            "canonical": {
+              "avg_slot_recall_gain": 0.125,
+              "avg_keyword_recall_gain": 0.09999999999999998,
+              "hierarchy_win_rate": 0.5,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.5,
+              "avg_retrieved_token_delta": -3.0,
+              "avg_slot_recall_per_token_gain": -0.004464285714285716
+            },
+            "unseen_seeds": {
+              "avg_slot_recall_gain": 0.125,
+              "avg_keyword_recall_gain": 0.09999999999999998,
+              "hierarchy_win_rate": 0.5,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.5,
+              "avg_retrieved_token_delta": -3.0,
+              "avg_slot_recall_per_token_gain": -0.0015625000000000014
+            },
+            "hard_perturbations": {
+              "avg_slot_recall_gain": 0.25,
+              "avg_keyword_recall_gain": 0.19999999999999996,
+              "hierarchy_win_rate": 1.0,
+              "flat_win_rate": 0.0,
+              "tie_rate": 0.0,
+              "avg_retrieved_token_delta": -6.0,
+              "avg_slot_recall_per_token_gain": -0.008928571428571432
+            }
+          },
+          "slice_seed_statistics": {
+            "canonical": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.125,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.125,
+                "ci95_high": 0.125,
+                "min": 0.125,
+                "max": 0.125,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.125
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.09999999999999998,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.09999999999999998,
+                "ci95_high": 0.09999999999999998,
+                "min": 0.09999999999999998,
+                "max": 0.09999999999999998,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.09999999999999998
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -3.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -3.0,
+                "ci95_high": -3.0,
+                "min": -3.0,
+                "max": -3.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -3.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.004464285714285716,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.004464285714285716,
+                "ci95_high": -0.004464285714285716,
+                "min": -0.004464285714285716,
+                "max": -0.004464285714285716,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -0.004464285714285716
+                  }
+                ]
+              }
+            },
+            "unseen_seeds": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.125,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.125,
+                "ci95_high": 0.125,
+                "min": 0.125,
+                "max": 0.125,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.125
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.09999999999999998,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.09999999999999998,
+                "ci95_high": 0.09999999999999998,
+                "min": 0.09999999999999998,
+                "max": 0.09999999999999998,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.09999999999999998
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.5,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.5,
+                "ci95_high": 0.5,
+                "min": 0.5,
+                "max": 0.5,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": 0.5
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -3.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -3.0,
+                "ci95_high": -3.0,
+                "min": -3.0,
+                "max": -3.0,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": -3.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.0015625000000000014,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.0015625000000000014,
+                "ci95_high": -0.0015625000000000014,
+                "min": -0.0015625000000000014,
+                "max": -0.0015625000000000014,
+                "by_seed": [
+                  {
+                    "seed": 111,
+                    "value": -0.0015625000000000014
+                  }
+                ]
+              }
+            },
+            "hard_perturbations": {
+              "avg_slot_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.25,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.25,
+                "ci95_high": 0.25,
+                "min": 0.25,
+                "max": 0.25,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.25
+                  }
+                ]
+              },
+              "avg_keyword_recall_gain": {
+                "seed_count": 1,
+                "mean": 0.19999999999999996,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.19999999999999996,
+                "ci95_high": 0.19999999999999996,
+                "min": 0.19999999999999996,
+                "max": 0.19999999999999996,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.19999999999999996
+                  }
+                ]
+              },
+              "hierarchy_win_rate": {
+                "seed_count": 1,
+                "mean": 1.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 1.0,
+                "ci95_high": 1.0,
+                "min": 1.0,
+                "max": 1.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 1.0
+                  }
+                ]
+              },
+              "flat_win_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "tie_rate": {
+                "seed_count": 1,
+                "mean": 0.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": 0.0,
+                "ci95_high": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": 0.0
+                  }
+                ]
+              },
+              "avg_retrieved_token_delta": {
+                "seed_count": 1,
+                "mean": -6.0,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -6.0,
+                "ci95_high": -6.0,
+                "min": -6.0,
+                "max": -6.0,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -6.0
+                  }
+                ]
+              },
+              "avg_slot_recall_per_token_gain": {
+                "seed_count": 1,
+                "mean": -0.008928571428571432,
+                "stddev": 0.0,
+                "stderr": 0.0,
+                "ci95_low": -0.008928571428571432,
+                "ci95_high": -0.008928571428571432,
+                "min": -0.008928571428571432,
+                "max": -0.008928571428571432,
+                "by_seed": [
+                  {
+                    "seed": 11,
+                    "value": -0.008928571428571432
+                  }
+                ]
+              }
+            }
+          },
+          "family_slice_metrics": {
+            "canonical": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              },
+              "temporal_override_chain": {
+                "avg_slot_recall_gain": 0.0,
+                "avg_keyword_recall_gain": 0.0,
+                "avg_retrieved_token_delta": 0.0,
+                "hierarchy_win_rate": 0.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 1.0
+              }
+            },
+            "unseen_seeds": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              },
+              "temporal_override_chain": {
+                "avg_slot_recall_gain": 0.0,
+                "avg_keyword_recall_gain": 0.0,
+                "avg_retrieved_token_delta": 0.0,
+                "hierarchy_win_rate": 0.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 1.0
+              }
+            },
+            "hard_perturbations": {
+              "cross_event_composition": {
+                "avg_slot_recall_gain": 0.25,
+                "avg_keyword_recall_gain": 0.19999999999999996,
+                "avg_retrieved_token_delta": -6.0,
+                "hierarchy_win_rate": 1.0,
+                "flat_win_rate": 0.0,
+                "tie_rate": 0.0
+              }
+            }
+          },
+          "stability_mode_id": "mode_01"
+        }
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "baseline",
+      "is_frontier": true,
+      "utility_score": 0.49999999999999994,
+      "overrides": {},
+      "objective_vector": {
+        "global.slot_gain": 0.15625,
+        "global.keyword_gain": 0.12499999999999997,
+        "global.hierarchy_win_rate": 0.625,
+        "global.token_delta": -3.75,
+        "global.slot_per_token_gain": -0.004854910714285716,
+        "global.flat_win_penalty": -0.0,
+        "robust.worst_slot_gain": 0.125,
+        "robust.worst_keyword_gain": 0.09999999999999998,
+        "family.multi_person_interference.slot_gain.max": 0.0,
+        "family.time_window_pressure.token_delta.max": 0.0
+      },
+      "objective_seed_statistics": {
+        "global.slot_gain": {
+          "seed_count_effective": 3,
+          "mean": 0.15625,
+          "stderr": 0.0,
+          "ci95_low": 0.15625,
+          "ci95_high": 0.15625
+        },
+        "global.keyword_gain": {
+          "seed_count_effective": 3,
+          "mean": 0.12499999999999997,
+          "stderr": 0.0,
+          "ci95_low": 0.12499999999999997,
+          "ci95_high": 0.12499999999999997
+        },
+        "global.hierarchy_win_rate": {
+          "seed_count_effective": 3,
+          "mean": 0.625,
+          "stderr": 0.0,
+          "ci95_low": 0.625,
+          "ci95_high": 0.625
+        },
+        "global.token_delta": {
+          "seed_count_effective": 3,
+          "mean": -3.75,
+          "stderr": 0.0,
+          "ci95_low": -3.75,
+          "ci95_high": -3.75
+        },
+        "global.slot_per_token_gain": {
+          "seed_count_effective": 3,
+          "mean": -0.004854910714285716,
+          "stderr": 0.0,
+          "ci95_low": -0.004854910714285716,
+          "ci95_high": -0.004854910714285716
+        },
+        "global.flat_win_penalty": {
+          "seed_count_effective": 3,
+          "mean": -0.0,
+          "stderr": 0.0,
+          "ci95_low": -0.0,
+          "ci95_high": -0.0
+        }
+      },
+      "slice_summaries": {
+        "canonical": {
+          "avg_slot_recall_gain": 0.125,
+          "avg_keyword_recall_gain": 0.09999999999999998,
+          "hierarchy_win_rate": 0.5,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.5,
+          "avg_retrieved_token_delta": -3.0,
+          "avg_slot_recall_per_token_gain": -0.004464285714285716
+        },
+        "unseen_seeds": {
+          "avg_slot_recall_gain": 0.125,
+          "avg_keyword_recall_gain": 0.09999999999999998,
+          "hierarchy_win_rate": 0.5,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.5,
+          "avg_retrieved_token_delta": -3.0,
+          "avg_slot_recall_per_token_gain": -0.0015625000000000014
+        },
+        "hard_perturbations": {
+          "avg_slot_recall_gain": 0.25,
+          "avg_keyword_recall_gain": 0.19999999999999996,
+          "hierarchy_win_rate": 1.0,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.0,
+          "avg_retrieved_token_delta": -6.0,
+          "avg_slot_recall_per_token_gain": -0.008928571428571432
+        }
+      },
+      "slice_seed_statistics": {
+        "canonical": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.125,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.125,
+            "ci95_high": 0.125,
+            "min": 0.125,
+            "max": 0.125,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.125
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.09999999999999998,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.09999999999999998,
+            "ci95_high": 0.09999999999999998,
+            "min": 0.09999999999999998,
+            "max": 0.09999999999999998,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.09999999999999998
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.5
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.5
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -3.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -3.0,
+            "ci95_high": -3.0,
+            "min": -3.0,
+            "max": -3.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -3.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.004464285714285716,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.004464285714285716,
+            "ci95_high": -0.004464285714285716,
+            "min": -0.004464285714285716,
+            "max": -0.004464285714285716,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -0.004464285714285716
+              }
+            ]
+          }
+        },
+        "unseen_seeds": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.125,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.125,
+            "ci95_high": 0.125,
+            "min": 0.125,
+            "max": 0.125,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.125
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.09999999999999998,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.09999999999999998,
+            "ci95_high": 0.09999999999999998,
+            "min": 0.09999999999999998,
+            "max": 0.09999999999999998,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.09999999999999998
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.5
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.5
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -3.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -3.0,
+            "ci95_high": -3.0,
+            "min": -3.0,
+            "max": -3.0,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": -3.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.0015625000000000014,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.0015625000000000014,
+            "ci95_high": -0.0015625000000000014,
+            "min": -0.0015625000000000014,
+            "max": -0.0015625000000000014,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": -0.0015625000000000014
+              }
+            ]
+          }
+        },
+        "hard_perturbations": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.25,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.25,
+            "ci95_high": 0.25,
+            "min": 0.25,
+            "max": 0.25,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.25
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.19999999999999996,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.19999999999999996,
+            "ci95_high": 0.19999999999999996,
+            "min": 0.19999999999999996,
+            "max": 0.19999999999999996,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.19999999999999996
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 1.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 1.0,
+            "ci95_high": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 1.0
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -6.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -6.0,
+            "ci95_high": -6.0,
+            "min": -6.0,
+            "max": -6.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -6.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.008928571428571432,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.008928571428571432,
+            "ci95_high": -0.008928571428571432,
+            "min": -0.008928571428571432,
+            "max": -0.008928571428571432,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -0.008928571428571432
+              }
+            ]
+          }
+        }
+      },
+      "family_slice_metrics": {
+        "canonical": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          },
+          "temporal_override_chain": {
+            "avg_slot_recall_gain": 0.0,
+            "avg_keyword_recall_gain": 0.0,
+            "avg_retrieved_token_delta": 0.0,
+            "hierarchy_win_rate": 0.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 1.0
+          }
+        },
+        "unseen_seeds": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          },
+          "temporal_override_chain": {
+            "avg_slot_recall_gain": 0.0,
+            "avg_keyword_recall_gain": 0.0,
+            "avg_retrieved_token_delta": 0.0,
+            "hierarchy_win_rate": 0.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 1.0
+          }
+        },
+        "hard_perturbations": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          }
+        }
+      },
+      "stability_mode_id": "mode_01"
+    },
+    {
+      "candidate_id": "candidate_0001",
+      "is_frontier": true,
+      "utility_score": 0.49999999999999994,
+      "overrides": {
+        "resolver_thresholds.competing_person_score_gap": 0.24218,
+        "resolver_thresholds.competing_person_score_ratio": 0.610865,
+        "resolver_thresholds.competing_person_window": 6.0,
+        "resolver_thresholds.disambiguation_close_margin": 0.10225,
+        "resolver_thresholds.expansion_branch_target": 3.0,
+        "resolver_thresholds.low_confidence_margin": 0.149611,
+        "strategy_thresholds.coverage_min": 0.535675,
+        "strategy_thresholds.feature_active_min": 0.39771,
+        "strategy_thresholds.hierarchy_expand_min": 0.50559,
+        "strategy_thresholds.multi_branch_min": 0.574488,
+        "strategy_thresholds.revision_leaf_min": 0.407231,
+        "supplemental_thresholds.base_utility_threshold": 0.116988,
+        "supplemental_thresholds.communication_gap_relax": 0.002436,
+        "supplemental_thresholds.disambiguation_relax": 0.056665,
+        "supplemental_thresholds.low_confidence_relax": 0.011658,
+        "supplemental_thresholds.max_utility_threshold": 0.125311,
+        "supplemental_thresholds.min_utility_threshold": 0.069465,
+        "supplemental_thresholds.missing_required_relax": 0.01313,
+        "supplemental_thresholds.polarity_relax": 0.007198,
+        "supplemental_thresholds.temporal_only_penalty": 0.060477,
+        "supplemental_weights.communication_bonus": 0.050639,
+        "supplemental_weights.coverage_bonus_per_key": 0.118101,
+        "supplemental_weights.disambiguation_bonus": 0.063809,
+        "supplemental_weights.entity_aligned_bonus": 0.023196,
+        "supplemental_weights.polarity_bonus": 0.176128,
+        "supplemental_weights.required_bonus_per_key": 0.144854
+      },
+      "objective_vector": {
+        "global.slot_gain": 0.15625,
+        "global.keyword_gain": 0.12499999999999997,
+        "global.hierarchy_win_rate": 0.625,
+        "global.token_delta": -3.75,
+        "global.slot_per_token_gain": -0.004854910714285716,
+        "global.flat_win_penalty": -0.0,
+        "robust.worst_slot_gain": 0.125,
+        "robust.worst_keyword_gain": 0.09999999999999998,
+        "family.multi_person_interference.slot_gain.max": 0.0,
+        "family.time_window_pressure.token_delta.max": 0.0
+      },
+      "objective_seed_statistics": {
+        "global.slot_gain": {
+          "seed_count_effective": 3,
+          "mean": 0.15625,
+          "stderr": 0.0,
+          "ci95_low": 0.15625,
+          "ci95_high": 0.15625
+        },
+        "global.keyword_gain": {
+          "seed_count_effective": 3,
+          "mean": 0.12499999999999997,
+          "stderr": 0.0,
+          "ci95_low": 0.12499999999999997,
+          "ci95_high": 0.12499999999999997
+        },
+        "global.hierarchy_win_rate": {
+          "seed_count_effective": 3,
+          "mean": 0.625,
+          "stderr": 0.0,
+          "ci95_low": 0.625,
+          "ci95_high": 0.625
+        },
+        "global.token_delta": {
+          "seed_count_effective": 3,
+          "mean": -3.75,
+          "stderr": 0.0,
+          "ci95_low": -3.75,
+          "ci95_high": -3.75
+        },
+        "global.slot_per_token_gain": {
+          "seed_count_effective": 3,
+          "mean": -0.004854910714285716,
+          "stderr": 0.0,
+          "ci95_low": -0.004854910714285716,
+          "ci95_high": -0.004854910714285716
+        },
+        "global.flat_win_penalty": {
+          "seed_count_effective": 3,
+          "mean": -0.0,
+          "stderr": 0.0,
+          "ci95_low": -0.0,
+          "ci95_high": -0.0
+        }
+      },
+      "slice_summaries": {
+        "canonical": {
+          "avg_slot_recall_gain": 0.125,
+          "avg_keyword_recall_gain": 0.09999999999999998,
+          "hierarchy_win_rate": 0.5,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.5,
+          "avg_retrieved_token_delta": -3.0,
+          "avg_slot_recall_per_token_gain": -0.004464285714285716
+        },
+        "unseen_seeds": {
+          "avg_slot_recall_gain": 0.125,
+          "avg_keyword_recall_gain": 0.09999999999999998,
+          "hierarchy_win_rate": 0.5,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.5,
+          "avg_retrieved_token_delta": -3.0,
+          "avg_slot_recall_per_token_gain": -0.0015625000000000014
+        },
+        "hard_perturbations": {
+          "avg_slot_recall_gain": 0.25,
+          "avg_keyword_recall_gain": 0.19999999999999996,
+          "hierarchy_win_rate": 1.0,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.0,
+          "avg_retrieved_token_delta": -6.0,
+          "avg_slot_recall_per_token_gain": -0.008928571428571432
+        }
+      },
+      "slice_seed_statistics": {
+        "canonical": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.125,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.125,
+            "ci95_high": 0.125,
+            "min": 0.125,
+            "max": 0.125,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.125
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.09999999999999998,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.09999999999999998,
+            "ci95_high": 0.09999999999999998,
+            "min": 0.09999999999999998,
+            "max": 0.09999999999999998,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.09999999999999998
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.5
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.5
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -3.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -3.0,
+            "ci95_high": -3.0,
+            "min": -3.0,
+            "max": -3.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -3.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.004464285714285716,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.004464285714285716,
+            "ci95_high": -0.004464285714285716,
+            "min": -0.004464285714285716,
+            "max": -0.004464285714285716,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -0.004464285714285716
+              }
+            ]
+          }
+        },
+        "unseen_seeds": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.125,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.125,
+            "ci95_high": 0.125,
+            "min": 0.125,
+            "max": 0.125,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.125
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.09999999999999998,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.09999999999999998,
+            "ci95_high": 0.09999999999999998,
+            "min": 0.09999999999999998,
+            "max": 0.09999999999999998,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.09999999999999998
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.5
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.5
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -3.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -3.0,
+            "ci95_high": -3.0,
+            "min": -3.0,
+            "max": -3.0,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": -3.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.0015625000000000014,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.0015625000000000014,
+            "ci95_high": -0.0015625000000000014,
+            "min": -0.0015625000000000014,
+            "max": -0.0015625000000000014,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": -0.0015625000000000014
+              }
+            ]
+          }
+        },
+        "hard_perturbations": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.25,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.25,
+            "ci95_high": 0.25,
+            "min": 0.25,
+            "max": 0.25,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.25
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.19999999999999996,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.19999999999999996,
+            "ci95_high": 0.19999999999999996,
+            "min": 0.19999999999999996,
+            "max": 0.19999999999999996,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.19999999999999996
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 1.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 1.0,
+            "ci95_high": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 1.0
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -6.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -6.0,
+            "ci95_high": -6.0,
+            "min": -6.0,
+            "max": -6.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -6.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.008928571428571432,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.008928571428571432,
+            "ci95_high": -0.008928571428571432,
+            "min": -0.008928571428571432,
+            "max": -0.008928571428571432,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -0.008928571428571432
+              }
+            ]
+          }
+        }
+      },
+      "family_slice_metrics": {
+        "canonical": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          },
+          "temporal_override_chain": {
+            "avg_slot_recall_gain": 0.0,
+            "avg_keyword_recall_gain": 0.0,
+            "avg_retrieved_token_delta": 0.0,
+            "hierarchy_win_rate": 0.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 1.0
+          }
+        },
+        "unseen_seeds": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          },
+          "temporal_override_chain": {
+            "avg_slot_recall_gain": 0.0,
+            "avg_keyword_recall_gain": 0.0,
+            "avg_retrieved_token_delta": 0.0,
+            "hierarchy_win_rate": 0.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 1.0
+          }
+        },
+        "hard_perturbations": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          }
+        }
+      },
+      "stability_mode_id": "mode_01"
+    },
+    {
+      "candidate_id": "candidate_0002",
+      "is_frontier": true,
+      "utility_score": 0.49999999999999994,
+      "overrides": {
+        "resolver_thresholds.competing_person_score_gap": 0.309224,
+        "resolver_thresholds.competing_person_score_ratio": 0.530382,
+        "resolver_thresholds.competing_person_window": 12.0,
+        "resolver_thresholds.disambiguation_close_margin": 0.066019,
+        "resolver_thresholds.expansion_branch_target": 3.0,
+        "resolver_thresholds.low_confidence_margin": 0.047428,
+        "strategy_thresholds.coverage_min": 0.40996,
+        "strategy_thresholds.feature_active_min": 0.279668,
+        "strategy_thresholds.hierarchy_expand_min": 0.483016,
+        "strategy_thresholds.multi_branch_min": 0.720289,
+        "strategy_thresholds.revision_leaf_min": 0.54184,
+        "supplemental_thresholds.base_utility_threshold": 0.06514,
+        "supplemental_thresholds.communication_gap_relax": 0.042803,
+        "supplemental_thresholds.disambiguation_relax": 0.017375,
+        "supplemental_thresholds.low_confidence_relax": 0.021984,
+        "supplemental_thresholds.max_utility_threshold": 0.18739,
+        "supplemental_thresholds.min_utility_threshold": 0.018543,
+        "supplemental_thresholds.missing_required_relax": 0.046878,
+        "supplemental_thresholds.polarity_relax": 0.049504,
+        "supplemental_thresholds.temporal_only_penalty": 0.006598,
+        "supplemental_weights.communication_bonus": 0.144227,
+        "supplemental_weights.coverage_bonus_per_key": 0.023881,
+        "supplemental_weights.disambiguation_bonus": 0.134512,
+        "supplemental_weights.entity_aligned_bonus": 0.058248,
+        "supplemental_weights.polarity_bonus": 0.073187,
+        "supplemental_weights.required_bonus_per_key": 0.116119
+      },
+      "objective_vector": {
+        "global.slot_gain": 0.15625,
+        "global.keyword_gain": 0.12499999999999997,
+        "global.hierarchy_win_rate": 0.625,
+        "global.token_delta": -3.75,
+        "global.slot_per_token_gain": -0.004854910714285716,
+        "global.flat_win_penalty": -0.0,
+        "robust.worst_slot_gain": 0.125,
+        "robust.worst_keyword_gain": 0.09999999999999998,
+        "family.multi_person_interference.slot_gain.max": 0.0,
+        "family.time_window_pressure.token_delta.max": 0.0
+      },
+      "objective_seed_statistics": {
+        "global.slot_gain": {
+          "seed_count_effective": 3,
+          "mean": 0.15625,
+          "stderr": 0.0,
+          "ci95_low": 0.15625,
+          "ci95_high": 0.15625
+        },
+        "global.keyword_gain": {
+          "seed_count_effective": 3,
+          "mean": 0.12499999999999997,
+          "stderr": 0.0,
+          "ci95_low": 0.12499999999999997,
+          "ci95_high": 0.12499999999999997
+        },
+        "global.hierarchy_win_rate": {
+          "seed_count_effective": 3,
+          "mean": 0.625,
+          "stderr": 0.0,
+          "ci95_low": 0.625,
+          "ci95_high": 0.625
+        },
+        "global.token_delta": {
+          "seed_count_effective": 3,
+          "mean": -3.75,
+          "stderr": 0.0,
+          "ci95_low": -3.75,
+          "ci95_high": -3.75
+        },
+        "global.slot_per_token_gain": {
+          "seed_count_effective": 3,
+          "mean": -0.004854910714285716,
+          "stderr": 0.0,
+          "ci95_low": -0.004854910714285716,
+          "ci95_high": -0.004854910714285716
+        },
+        "global.flat_win_penalty": {
+          "seed_count_effective": 3,
+          "mean": -0.0,
+          "stderr": 0.0,
+          "ci95_low": -0.0,
+          "ci95_high": -0.0
+        }
+      },
+      "slice_summaries": {
+        "canonical": {
+          "avg_slot_recall_gain": 0.125,
+          "avg_keyword_recall_gain": 0.09999999999999998,
+          "hierarchy_win_rate": 0.5,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.5,
+          "avg_retrieved_token_delta": -3.0,
+          "avg_slot_recall_per_token_gain": -0.004464285714285716
+        },
+        "unseen_seeds": {
+          "avg_slot_recall_gain": 0.125,
+          "avg_keyword_recall_gain": 0.09999999999999998,
+          "hierarchy_win_rate": 0.5,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.5,
+          "avg_retrieved_token_delta": -3.0,
+          "avg_slot_recall_per_token_gain": -0.0015625000000000014
+        },
+        "hard_perturbations": {
+          "avg_slot_recall_gain": 0.25,
+          "avg_keyword_recall_gain": 0.19999999999999996,
+          "hierarchy_win_rate": 1.0,
+          "flat_win_rate": 0.0,
+          "tie_rate": 0.0,
+          "avg_retrieved_token_delta": -6.0,
+          "avg_slot_recall_per_token_gain": -0.008928571428571432
+        }
+      },
+      "slice_seed_statistics": {
+        "canonical": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.125,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.125,
+            "ci95_high": 0.125,
+            "min": 0.125,
+            "max": 0.125,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.125
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.09999999999999998,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.09999999999999998,
+            "ci95_high": 0.09999999999999998,
+            "min": 0.09999999999999998,
+            "max": 0.09999999999999998,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.09999999999999998
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.5
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.5
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -3.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -3.0,
+            "ci95_high": -3.0,
+            "min": -3.0,
+            "max": -3.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -3.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.004464285714285716,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.004464285714285716,
+            "ci95_high": -0.004464285714285716,
+            "min": -0.004464285714285716,
+            "max": -0.004464285714285716,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -0.004464285714285716
+              }
+            ]
+          }
+        },
+        "unseen_seeds": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.125,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.125,
+            "ci95_high": 0.125,
+            "min": 0.125,
+            "max": 0.125,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.125
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.09999999999999998,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.09999999999999998,
+            "ci95_high": 0.09999999999999998,
+            "min": 0.09999999999999998,
+            "max": 0.09999999999999998,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.09999999999999998
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.5
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.5,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.5,
+            "ci95_high": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": 0.5
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -3.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -3.0,
+            "ci95_high": -3.0,
+            "min": -3.0,
+            "max": -3.0,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": -3.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.0015625000000000014,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.0015625000000000014,
+            "ci95_high": -0.0015625000000000014,
+            "min": -0.0015625000000000014,
+            "max": -0.0015625000000000014,
+            "by_seed": [
+              {
+                "seed": 111,
+                "value": -0.0015625000000000014
+              }
+            ]
+          }
+        },
+        "hard_perturbations": {
+          "avg_slot_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.25,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.25,
+            "ci95_high": 0.25,
+            "min": 0.25,
+            "max": 0.25,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.25
+              }
+            ]
+          },
+          "avg_keyword_recall_gain": {
+            "seed_count": 1,
+            "mean": 0.19999999999999996,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.19999999999999996,
+            "ci95_high": 0.19999999999999996,
+            "min": 0.19999999999999996,
+            "max": 0.19999999999999996,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.19999999999999996
+              }
+            ]
+          },
+          "hierarchy_win_rate": {
+            "seed_count": 1,
+            "mean": 1.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 1.0,
+            "ci95_high": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 1.0
+              }
+            ]
+          },
+          "flat_win_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "tie_rate": {
+            "seed_count": 1,
+            "mean": 0.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": 0.0,
+            "ci95_high": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": 0.0
+              }
+            ]
+          },
+          "avg_retrieved_token_delta": {
+            "seed_count": 1,
+            "mean": -6.0,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -6.0,
+            "ci95_high": -6.0,
+            "min": -6.0,
+            "max": -6.0,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -6.0
+              }
+            ]
+          },
+          "avg_slot_recall_per_token_gain": {
+            "seed_count": 1,
+            "mean": -0.008928571428571432,
+            "stddev": 0.0,
+            "stderr": 0.0,
+            "ci95_low": -0.008928571428571432,
+            "ci95_high": -0.008928571428571432,
+            "min": -0.008928571428571432,
+            "max": -0.008928571428571432,
+            "by_seed": [
+              {
+                "seed": 11,
+                "value": -0.008928571428571432
+              }
+            ]
+          }
+        }
+      },
+      "family_slice_metrics": {
+        "canonical": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          },
+          "temporal_override_chain": {
+            "avg_slot_recall_gain": 0.0,
+            "avg_keyword_recall_gain": 0.0,
+            "avg_retrieved_token_delta": 0.0,
+            "hierarchy_win_rate": 0.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 1.0
+          }
+        },
+        "unseen_seeds": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          },
+          "temporal_override_chain": {
+            "avg_slot_recall_gain": 0.0,
+            "avg_keyword_recall_gain": 0.0,
+            "avg_retrieved_token_delta": 0.0,
+            "hierarchy_win_rate": 0.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 1.0
+          }
+        },
+        "hard_perturbations": {
+          "cross_event_composition": {
+            "avg_slot_recall_gain": 0.25,
+            "avg_keyword_recall_gain": 0.19999999999999996,
+            "avg_retrieved_token_delta": -6.0,
+            "hierarchy_win_rate": 1.0,
+            "flat_win_rate": 0.0,
+            "tie_rate": 0.0
+          }
+        }
+      },
+      "stability_mode_id": "mode_01"
+    }
+  ]
+}

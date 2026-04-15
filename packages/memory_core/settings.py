@@ -126,6 +126,33 @@ def _default_query_routing_policy() -> dict[str, Any]:
             "multi_branch_min": 0.65,
             "feature_active_min": 0.34,
         },
+        "resolver_thresholds": {
+            "low_confidence_margin": 0.08,
+            "disambiguation_close_margin": 0.08,
+            "competing_person_score_ratio": 0.55,
+            "competing_person_score_gap": 0.25,
+            "competing_person_window": 8,
+            "expansion_branch_target": 2,
+        },
+        "supplemental_weights": {
+            "coverage_bonus_per_key": 0.06,
+            "required_bonus_per_key": 0.12,
+            "communication_bonus": 0.10,
+            "polarity_bonus": 0.10,
+            "disambiguation_bonus": 0.10,
+            "entity_aligned_bonus": 0.03,
+        },
+        "supplemental_thresholds": {
+            "base_utility_threshold": 0.08,
+            "missing_required_relax": 0.02,
+            "communication_gap_relax": 0.02,
+            "polarity_relax": 0.02,
+            "disambiguation_relax": 0.03,
+            "low_confidence_relax": 0.01,
+            "temporal_only_penalty": 0.04,
+            "min_utility_threshold": 0.04,
+            "max_utility_threshold": 0.14,
+        },
     }
 
 
@@ -140,7 +167,15 @@ def load_query_routing_policy(path: Path = QUERY_ROUTING_POLICY_PATH) -> dict[st
         return _default_query_routing_policy()
     baseline = _default_query_routing_policy()
     merged = dict(baseline)
-    for key in ("feature_triggers", "feature_norms", "feature_weights", "strategy_thresholds"):
+    for key in (
+        "feature_triggers",
+        "feature_norms",
+        "feature_weights",
+        "strategy_thresholds",
+        "resolver_thresholds",
+        "supplemental_weights",
+        "supplemental_thresholds",
+    ):
         value = payload.get(key)
         if isinstance(value, dict):
             merged[key] = value
@@ -158,6 +193,10 @@ class Settings:
     summary_model: str = field(default_factory=lambda: os.getenv("PROJECT_SUMMARY_MODEL", "gpt-5-nano"))
     verifier_model: str = field(default_factory=lambda: os.getenv("PROJECT_VERIFIER_MODEL", "gpt-5-nano"))
     model_timeout_seconds: float = field(default_factory=lambda: float(os.getenv("PROJECT_MODEL_TIMEOUT_SECONDS", "30")))
+    model_max_retries: int = field(default_factory=lambda: int(os.getenv("PROJECT_MODEL_MAX_RETRIES", "3")))
+    model_retry_backoff_seconds: float = field(
+        default_factory=lambda: float(os.getenv("PROJECT_MODEL_RETRY_BACKOFF_SECONDS", "1.5"))
+    )
     time_window_hours: int = field(default_factory=lambda: int(os.getenv("PROJECT_TIME_WINDOW_HOURS", "6")))
     cluster_similarity_threshold: float = field(
         default_factory=lambda: float(os.getenv("PROJECT_CLUSTER_SIMILARITY_THRESHOLD", "0.18"))

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import random
+import time
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -73,10 +75,23 @@ class MockModelClient(ModelClient):
 
 
 class OpenAICompatibleClient(ModelClient):
-    def __init__(self, base_url: str, api_key: str, timeout_seconds: float) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str,
+        timeout_seconds: float,
+        max_retries: int = 3,
+        retry_backoff_seconds: float = 1.5,
+    ) -> None:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.timeout_seconds = timeout_seconds
+        self.max_retries = max(0, int(max_retries))
+        self.retry_backoff_seconds = max(0.0, float(retry_backoff_seconds))
+
+    def _retry_sleep_seconds(self, attempt_index: int) -> float:
+        # Exponential backoff with a small jitter to reduce burst retries.
+        return self.retry_backoff_seconds * (2 ** max(0, attempt_index - 1)) + random.uniform(0.0, 0.25)
 
     def generate_json(
         self,
@@ -103,21 +118,48 @@ class OpenAICompatibleClient(ModelClient):
                 }
             },
         }
-        response = httpx.post(
-            f"{self.base_url}/responses",
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            },
-            json=request_body,
-            timeout=self.timeout_seconds,
-        )
-        try:
-            response.raise_for_status()
-        except httpx.HTTPStatusError as exc:
-            raise RuntimeError(
-                f"Responses API request failed with {response.status_code}: {response.text}"
-            ) from exc
+        endpoint = f"{self.base_url}/responses"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        response: httpx.Response | None = None
+        for attempt in range(1, self.max_retries + 2):
+            try:
+                response = httpx.post(
+                    endpoint,
+                    headers=headers,
+                    json=request_body,
+                    timeout=self.timeout_seconds,
+                )
+            except (httpx.TimeoutException, httpx.TransportError) as exc:
+                if attempt > self.max_retries:
+                    raise RuntimeError(
+                        f"Responses API request failed after {attempt} attempts with transport timeout/error: {exc}"
+                    ) from exc
+                time.sleep(self._retry_sleep_seconds(attempt))
+                continue
+
+            # Retry transient back-end/load errors.
+            if response.status_code in {408, 409, 429} or response.status_code >= 500:
+                if attempt > self.max_retries:
+                    raise RuntimeError(
+                        f"Responses API request failed after {attempt} attempts with status {response.status_code}: {response.text}"
+                    )
+                time.sleep(self._retry_sleep_seconds(attempt))
+                continue
+
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                raise RuntimeError(
+                    f"Responses API request failed with {response.status_code}: {response.text}"
+                ) from exc
+            break
+
+        if response is None:
+            raise RuntimeError("Responses API request failed before receiving any response.")
+
         payload = response.json()
         content = payload.get("output_text")
         if not content:

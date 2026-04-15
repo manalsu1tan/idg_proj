@@ -127,6 +127,21 @@ class QueryFeatureScorer:
             for key, value in (policy.get("strategy_thresholds", {}) or {}).items()
             if isinstance(value, (int, float))
         }
+        self.resolver_thresholds: dict[str, float] = {
+            key: float(value)
+            for key, value in (policy.get("resolver_thresholds", {}) or {}).items()
+            if isinstance(value, (int, float))
+        }
+        self.supplemental_weights: dict[str, float] = {
+            key: float(value)
+            for key, value in (policy.get("supplemental_weights", {}) or {}).items()
+            if isinstance(value, (int, float))
+        }
+        self.supplemental_thresholds: dict[str, float] = {
+            key: float(value)
+            for key, value in (policy.get("supplemental_thresholds", {}) or {}).items()
+            if isinstance(value, (int, float))
+        }
         for feature in self.FEATURE_KEYS:
             self.feature_triggers.setdefault(feature, [])
             self.feature_norms.setdefault(feature, 2.0)
@@ -137,6 +152,27 @@ class QueryFeatureScorer:
         self.thresholds.setdefault("hierarchy_expand_min", 0.48)
         self.thresholds.setdefault("multi_branch_min", 0.65)
         self.thresholds.setdefault("feature_active_min", 0.34)
+        self.resolver_thresholds.setdefault("low_confidence_margin", 0.08)
+        self.resolver_thresholds.setdefault("disambiguation_close_margin", 0.08)
+        self.resolver_thresholds.setdefault("competing_person_score_ratio", 0.55)
+        self.resolver_thresholds.setdefault("competing_person_score_gap", 0.25)
+        self.resolver_thresholds.setdefault("competing_person_window", 8.0)
+        self.resolver_thresholds.setdefault("expansion_branch_target", 2.0)
+        self.supplemental_weights.setdefault("coverage_bonus_per_key", 0.06)
+        self.supplemental_weights.setdefault("required_bonus_per_key", 0.12)
+        self.supplemental_weights.setdefault("communication_bonus", 0.10)
+        self.supplemental_weights.setdefault("polarity_bonus", 0.10)
+        self.supplemental_weights.setdefault("disambiguation_bonus", 0.10)
+        self.supplemental_weights.setdefault("entity_aligned_bonus", 0.03)
+        self.supplemental_thresholds.setdefault("base_utility_threshold", 0.08)
+        self.supplemental_thresholds.setdefault("missing_required_relax", 0.02)
+        self.supplemental_thresholds.setdefault("communication_gap_relax", 0.02)
+        self.supplemental_thresholds.setdefault("polarity_relax", 0.02)
+        self.supplemental_thresholds.setdefault("disambiguation_relax", 0.03)
+        self.supplemental_thresholds.setdefault("low_confidence_relax", 0.01)
+        self.supplemental_thresholds.setdefault("temporal_only_penalty", 0.04)
+        self.supplemental_thresholds.setdefault("min_utility_threshold", 0.04)
+        self.supplemental_thresholds.setdefault("max_utility_threshold", 0.14)
 
     def _normalize_text(self, text: str) -> str:
         lowered = text.lower()
@@ -523,6 +559,8 @@ class HierarchicalRetriever:
         ambiguity_cue = feature_scores.get("entity_ambiguity_cue", 0.0)
         query_entities = self._expand_query_entities(agent_id, self._query_entities(query))
         feature_active_min = self.feature_scorer.thresholds.get("feature_active_min", 0.34)
+        expansion_target = max(2, int(self.feature_scorer.resolver_thresholds.get("expansion_branch_target", 2.0)))
+        supplemental_weights = self.feature_scorer.supplemental_weights
         composition_query = composition_cue >= feature_active_min
         negation_sensitive_query = negation_cue >= feature_active_min
         conflict_query = conflict_cue >= feature_active_min
@@ -696,7 +734,7 @@ class HierarchicalRetriever:
                 or revision_needs_expansion
                 or coverage_plan.requires_multi_leaf
             ):
-                adaptive_branch_limit = max(adaptive_branch_limit, 2)
+                adaptive_branch_limit = max(adaptive_branch_limit, expansion_target)
             adaptive_branch_limit = min(adaptive_branch_limit, branch_limit)
 
         ranked_summaries = sorted(summary_scores, key=lambda item: item.score, reverse=True)[:adaptive_branch_limit]
@@ -872,6 +910,7 @@ class HierarchicalRetriever:
                     picked=picked,
                     needs_polarity_balance=negation_sensitive_query and needs_polarity_balance,
                     needs_entity_disambiguation=needs_entity_disambiguation,
+                    expansion_target=expansion_target,
                 )
                 if leaf_count >= target_leaf_count:
                     break
@@ -947,16 +986,16 @@ class HierarchicalRetriever:
                         continue
                     utility = candidate.score
                     utility_bonus = 0.0
-                    utility_bonus += 0.06 * len(new_coverage)
-                    utility_bonus += 0.12 * len(required_hits)
+                    utility_bonus += supplemental_weights.get("coverage_bonus_per_key", 0.06) * len(new_coverage)
+                    utility_bonus += supplemental_weights.get("required_bonus_per_key", 0.12) * len(required_hits)
                     if adds_comm:
-                        utility_bonus += 0.10
+                        utility_bonus += supplemental_weights.get("communication_bonus", 0.10)
                     if provides_polarity_signal:
-                        utility_bonus += 0.10
+                        utility_bonus += supplemental_weights.get("polarity_bonus", 0.10)
                     if provides_disambiguation_signal:
-                        utility_bonus += 0.10
+                        utility_bonus += supplemental_weights.get("disambiguation_bonus", 0.10)
                     if is_entity_aligned:
-                        utility_bonus += 0.03
+                        utility_bonus += supplemental_weights.get("entity_aligned_bonus", 0.03)
                     # Tightening: require non-trivial marginal utility before adding leaf #2+.
                     if leaf_count > 0 and utility_bonus < utility_threshold:
                         continue
@@ -1031,7 +1070,8 @@ class HierarchicalRetriever:
     def _is_low_confidence(self, ranked_leaves: list[CandidateScore]) -> bool:
         if len(ranked_leaves) < 2:
             return False
-        if (ranked_leaves[0].score - ranked_leaves[1].score) > 0.08:
+        margin = float(self.feature_scorer.resolver_thresholds.get("low_confidence_margin", 0.08))
+        if (ranked_leaves[0].score - ranked_leaves[1].score) > margin:
             return False
         shared_entities = set(ranked_leaves[0].node.entities) & set(ranked_leaves[1].node.entities)
         return not shared_entities
@@ -1047,10 +1087,16 @@ class HierarchicalRetriever:
         if not query_entities or not ranked_leaves:
             return False
         top_score = ranked_leaves[0].score
-        competing_candidates = ranked_leaves[:8]
+        window = max(2, int(self.feature_scorer.resolver_thresholds.get("competing_person_window", 8.0)))
+        ratio = float(self.feature_scorer.resolver_thresholds.get("competing_person_score_ratio", 0.55))
+        gap = float(self.feature_scorer.resolver_thresholds.get("competing_person_score_gap", 0.25))
+        competing_candidates = ranked_leaves[:window]
         has_aligned = any(self._is_entity_aligned(candidate.node, query_entities) for candidate in competing_candidates)
         has_conflicting = any(
-            (candidate.score >= top_score * 0.55)
+            (
+                (candidate.score >= top_score * ratio)
+                or ((top_score - candidate.score) <= gap)
+            )
             and (not self._is_entity_aligned(candidate.node, query_entities))
             and self._has_conflicting_named_entity(candidate.node, query_entities)
             for candidate in competing_candidates
@@ -1087,7 +1133,9 @@ class HierarchicalRetriever:
         if len(top_leaf_probe) < 2:
             return False
         runner_up = top_leaf_probe[1]
-        close_margin = (top_leaf.score - runner_up.score) <= 0.08
+        close_margin = (
+            top_leaf.score - runner_up.score
+        ) <= float(self.feature_scorer.resolver_thresholds.get("disambiguation_close_margin", 0.08))
         runner_up_mismatch = not self._is_entity_aligned(runner_up.node, query_entities)
         return runner_up_mismatch and (close_margin or low_confidence)
 
@@ -1311,23 +1359,25 @@ class HierarchicalRetriever:
         picked: list[CandidateScore],
         needs_polarity_balance: bool,
         needs_entity_disambiguation: bool,
+        expansion_target: int,
     ) -> int:
         if leaf_count <= 0:
             return 1
+        target = max(2, int(expansion_target))
         missing_required = required_facets - covered
         communication_hits = len(communication_facets & covered)
         if missing_required:
-            return max(leaf_count, 2)
+            return max(leaf_count, target)
         if communication_hits < communication_min_hits:
-            return max(leaf_count, 2)
+            return max(leaf_count, target)
         if enforce_entity_thread and query_entities and not self._has_entity_thread_anchor(picked, query_entities):
-            return max(leaf_count, 2)
+            return max(leaf_count, target)
         if needs_polarity_balance:
-            return max(leaf_count, 2)
+            return max(leaf_count, target)
         if needs_entity_disambiguation:
-            return max(leaf_count, 2)
+            return max(leaf_count, target)
         if low_confidence:
-            return max(leaf_count, 2)
+            return max(leaf_count, target)
         # If routing asked for coverage expansion but coverage is already satisfied with high confidence, do not expand.
         if routing_expansion:
             return leaf_count
@@ -1371,17 +1421,18 @@ class HierarchicalRetriever:
     ) -> float:
         if leaf_count <= 0:
             return 0.0
-        threshold = 0.08
+        thresholds = self.feature_scorer.supplemental_thresholds
+        threshold = float(thresholds.get("base_utility_threshold", 0.08))
         if missing_required:
-            threshold -= 0.02
+            threshold -= float(thresholds.get("missing_required_relax", 0.02))
         if communication_gap:
-            threshold -= 0.02
+            threshold -= float(thresholds.get("communication_gap_relax", 0.02))
         if needs_polarity_balance:
-            threshold -= 0.02
+            threshold -= float(thresholds.get("polarity_relax", 0.02))
         if needs_entity_disambiguation:
-            threshold -= 0.03
+            threshold -= float(thresholds.get("disambiguation_relax", 0.03))
         if low_confidence:
-            threshold -= 0.01
+            threshold -= float(thresholds.get("low_confidence_relax", 0.01))
         temporal_only = (
             temporal_cue >= feature_active_min
             and ambiguity_cue < feature_active_min
@@ -1392,8 +1443,10 @@ class HierarchicalRetriever:
             and not low_confidence
         )
         if temporal_only:
-            threshold += 0.04
-        return min(0.14, max(0.04, threshold))
+            threshold += float(thresholds.get("temporal_only_penalty", 0.04))
+        min_threshold = float(thresholds.get("min_utility_threshold", 0.04))
+        max_threshold = float(thresholds.get("max_utility_threshold", 0.14))
+        return min(max_threshold, max(min_threshold, threshold))
 
     def _has_entity_thread_anchor(self, picked: list[CandidateScore], query_entities: set[str]) -> bool:
         if not query_entities:
