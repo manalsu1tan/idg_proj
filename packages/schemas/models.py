@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Shared schema models
+Pydantic types for nodes traces api and eval payloads"""
+
 import json
 from datetime import datetime
 from enum import Enum
@@ -316,4 +319,7 @@ def dump_model_json(model: BaseModel) -> dict[str, Any]:
     return json.loads(model.json())  # type: ignore[no-any-return]
 
 
-TreeNode.update_forward_refs()
+if hasattr(TreeNode, "model_rebuild"):
+    TreeNode.model_rebuild()
+else:
+    TreeNode.update_forward_refs()

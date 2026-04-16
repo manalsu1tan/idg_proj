@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Eval report helpers
+Builds aggregate payloads and markdown output"""
+
 import argparse
 import json
 import statistics
@@ -17,10 +20,12 @@ REPORTS_DIR = Path(__file__).resolve().parents[2] / "reports"
 
 
 def _metric_map(metrics: list[dict[str, Any]]) -> dict[str, float]:
+    """Map metric rows to numeric value dict"""
     return {metric["name"]: float(metric["value"]) for metric in metrics}
 
 
 def _latest_runs_by_scenario(raw_runs: list[dict[str, Any]]) -> list[EvalRunResult]:
+    """Keep latest run per scenario name"""
     by_scenario: "OrderedDict[str, EvalRunResult]" = OrderedDict()
     for payload in sorted(raw_runs, key=lambda item: item.get("created_at") or ""):
         if hasattr(EvalRunResult, "model_validate"):
@@ -62,6 +67,7 @@ def _winner(baseline: dict[str, float], hierarchy: dict[str, float]) -> str:
 
 
 def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Aggregate baseline hierarchy and delta stats"""
     baseline_keyword = [row["baseline"].get("keyword_recall", 0.0) for row in rows]
     hierarchy_keyword = [row["hierarchy"].get("keyword_recall", 0.0) for row in rows]
     baseline_slot = [row["baseline"].get("slot_recall", 0.0) for row in rows]
@@ -105,6 +111,8 @@ def _aggregate_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def build_report_payload(raw_runs: list[dict[str, Any]]) -> dict[str, Any]:
+    """Build benchmark report payload from stored eval runs
+    Aggregates scenario and family metrics plus wins deltas and variance stats"""
     runs = _latest_runs_by_scenario(raw_runs)
     exported_at = datetime.now(timezone.utc).isoformat()
     scenario_rows: list[dict[str, Any]] = []
@@ -163,6 +171,8 @@ def build_report_payload(raw_runs: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def render_markdown_report(report: dict[str, Any]) -> str:
+    """Render benchmark report payload as markdown
+    Emits summary family tables scenario rows and notes section"""
     summary = report["summary"]
     lines = [
         "# Benchmark Report",
@@ -226,6 +236,8 @@ def render_markdown_report(report: dict[str, Any]) -> str:
 
 
 def export_report(service: MemoryService, output_dir: Path = REPORTS_DIR, stem: str | None = None) -> dict[str, Path]:
+    """Export report payload and markdown files
+    Returns output paths for downstream cli and api use"""
     report = build_report_payload(service.eval_runs())
     output_dir.mkdir(parents=True, exist_ok=True)
     safe_stem = stem or f"benchmark_report_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
@@ -237,6 +249,7 @@ def export_report(service: MemoryService, output_dir: Path = REPORTS_DIR, stem: 
 
 
 def main() -> None:
+    """CLI entrypoint for report export"""
     parser = argparse.ArgumentParser(description="Export a benchmark report from stored eval runs.")
     parser.add_argument("--output-dir", default=str(REPORTS_DIR), help="Directory to write report artifacts into.")
     parser.add_argument("--stem", default=None, help="Optional file stem for the generated report files.")

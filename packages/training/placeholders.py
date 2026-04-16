@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Module overview for placeholders
+Holds runtime helpers and wiring"""
+
 from dataclasses import dataclass
 
 

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Prompt loading utilities
+Reads prompt templates for model components"""
+
 from pathlib import Path
 
 

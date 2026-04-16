@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Ablation orchestration and reporting
+Compares policy toggles and retrieval variants"""
+
 import argparse
 import json
 import uuid
@@ -9,7 +12,8 @@ from typing import Callable
 
 from packages.evals.scenarios import all_scenarios, get_scenario, scenario_timestamp
 from packages.evals.runner import keyword_recall, metric, slot_recall
-from packages.memory_core.services import CandidateScore, MemoryService, build_retrieval_diagnostics
+from packages.memory_core.retrieval.pipeline_types import CandidateScore
+from packages.memory_core.services import MemoryService, build_retrieval_diagnostics
 from packages.memory_core.settings import load_settings
 from packages.schemas.models import (
     AblationMode,

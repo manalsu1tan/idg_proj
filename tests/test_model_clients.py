@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Test module overview for test model clients
+Covers behavior and regression checks"""
+
 import json
 
 from packages.memory_core.model_components import build_model_client
@@ -9,8 +12,10 @@ from packages.schemas.models import ModelProvider
 
 
 class DummyResponse:
-    def __init__(self, payload: dict):
+    def __init__(self, payload: dict, *, status_code: int = 200):
         self.payload = payload
+        self.status_code = status_code
+        self.text = json.dumps(payload)
 
     def raise_for_status(self) -> None:
         return None

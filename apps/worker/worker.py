@@ -1,23 +1,29 @@
 from __future__ import annotations
 
+"""Background worker job handlers
+Runs summary refresh and verify tasks"""
+
 from packages.memory_core.bootstrap import get_memory_service
 from packages.schemas.models import dump_model
 from packages.schemas.models import BuildSummariesRequest, RefreshRequest
 
 
 def build_summaries_job(agent_id: str) -> list[dict]:
+    """Worker task to build summaries for one agent"""
     service = get_memory_service()
     nodes = service.build_summaries(BuildSummariesRequest(agent_id=agent_id))
     return [dump_model(node) for node in nodes]
 
 
 def refresh_job(agent_id: str, changed_node_ids: list[str]) -> list[dict]:
+    """Worker task to mark stale nodes after source changes"""
     service = get_memory_service()
     nodes = service.refresh(RefreshRequest(agent_id=agent_id, changed_node_ids=changed_node_ids))
     return [dump_model(node) for node in nodes]
 
 
 def verify_job(node_id: str) -> dict | None:
+    """Worker task to run verifier for one summary node"""
     service = get_memory_service()
     node = service.store.get_node(node_id)
     if node is None:

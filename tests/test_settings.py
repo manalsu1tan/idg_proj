@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Test module overview for test settings
+Covers behavior and regression checks"""
+
 import os
 
 from packages.memory_core.settings import Settings, load_dotenv_file

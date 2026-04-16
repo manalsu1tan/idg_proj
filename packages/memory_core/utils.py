@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Core utility functions
+Text similarity embeddings token and datetime helpers"""
+
 import hashlib
 import math
 import re

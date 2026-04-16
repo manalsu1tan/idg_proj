@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Test module overview for test ablation
+Covers behavior and regression checks"""
+
 from packages.evals.ablation import build_ablation_report, run_ablation_scenario
 from packages.memory_core.services import MemoryService
 

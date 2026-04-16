@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Model client adapters
+Wraps mock and openai compatible json generation"""
+
 import json
 import random
 import time
@@ -12,6 +15,9 @@ from packages.memory_core.utils import extract_entities, unique_topics
 
 
 class ModelClient(ABC):
+    """Abstract interface for structured model calls
+    Implementations must return JSON payloads matching component schemas"""
+
     @abstractmethod
     def generate_json(
         self,
@@ -25,6 +31,9 @@ class ModelClient(ABC):
 
 
 class MockModelClient(ModelClient):
+    """Deterministic local model client
+    Used for tests smoke checks and offline runs without external API calls"""
+
     def generate_json(
         self,
         *,
@@ -33,6 +42,7 @@ class MockModelClient(ModelClient):
         system_prompt: str,
         user_payload: dict[str, Any],
     ) -> dict[str, Any]:
+        """Return synthetic payload by component type"""
         del model_name, system_prompt
         if component == "summarizer":
             child_nodes = user_payload["child_nodes"]
@@ -75,6 +85,9 @@ class MockModelClient(ModelClient):
 
 
 class OpenAICompatibleClient(ModelClient):
+    """Responses API client for openai compatible endpoints
+    Handles retries transient failures and strict JSON schema responses"""
+
     def __init__(
         self,
         base_url: str,
@@ -90,7 +103,7 @@ class OpenAICompatibleClient(ModelClient):
         self.retry_backoff_seconds = max(0.0, float(retry_backoff_seconds))
 
     def _retry_sleep_seconds(self, attempt_index: int) -> float:
-        # Exponential backoff with a small jitter to reduce burst retries.
+        # backoff plus small jitter to smooth retries
         return self.retry_backoff_seconds * (2 ** max(0, attempt_index - 1)) + random.uniform(0.0, 0.25)
 
     def generate_json(
@@ -101,6 +114,7 @@ class OpenAICompatibleClient(ModelClient):
         system_prompt: str,
         user_payload: dict[str, Any],
     ) -> dict[str, Any]:
+        """Call responses API and parse strict json content"""
         if not self.api_key:
             raise RuntimeError("PROJECT_MODEL_API_KEY is required for openai-compatible provider.")
         schema = self._schema_for_component(component)
@@ -140,7 +154,7 @@ class OpenAICompatibleClient(ModelClient):
                 time.sleep(self._retry_sleep_seconds(attempt))
                 continue
 
-            # Retry transient back-end/load errors.
+            # retry transient server and rate limit failures
             if response.status_code in {408, 409, 429} or response.status_code >= 500:
                 if attempt > self.max_retries:
                     raise RuntimeError(
@@ -167,6 +181,7 @@ class OpenAICompatibleClient(ModelClient):
         return json.loads(content)
 
     def _extract_response_text(self, payload: dict[str, Any]) -> str:
+        """Extract text from message style output array"""
         for item in payload.get("output", []):
             if item.get("type") != "message":
                 continue
@@ -176,6 +191,7 @@ class OpenAICompatibleClient(ModelClient):
         raise RuntimeError("Responses API returned no parseable text output.")
 
     def _schema_for_component(self, component: str) -> dict[str, Any]:
+        """Return strict json schema for component response"""
         if component == "summarizer":
             return {
                 "name": "summary_result",

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Frontier sweep cli and orchestration
+Runs candidate sampling scoring and report export"""
+
 import argparse
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import hashlib
@@ -17,6 +20,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from packages.evals.report import REPORTS_DIR, build_report_payload
+from packages.evals.frontier_report_builder import build_frontier_report_payload
 from packages.evals.runner import run_scenario_instance
 from packages.evals.scenarios import (
     DEFAULT_SCENARIO_SEEDS,
@@ -860,6 +864,8 @@ def _run_single_sweep(
     log_every_candidates: int,
     log_every_scenarios: int,
 ) -> SweepRunResult:
+    """Run one optimizer sweep for one random seed
+    Samples policy overrides evaluates candidates and extracts local frontier"""
     rng = random.Random(random_seed)
     sampled_overrides = _sample_overrides(dimensions, max_candidates=max_candidates, sample_method=sample_method, rng=rng)
     all_candidates: list[tuple[str, dict[str, float]]] = [("baseline", {})]
@@ -938,8 +944,10 @@ def _run_single_sweep(
             enabled=log_progress,
         )
     elif workers == 1:
+        # serial mode for simple local execution
         _run_candidates_serial()
     else:
+        # process pool mode for faster candidate throughput
         _log(
             f"run seed={random_seed}: parallel candidate evaluation enabled with workers={workers}.",
             enabled=log_progress,
@@ -1261,131 +1269,140 @@ def _load_checkpoint(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _render_markdown(
-    *,
-    exported_at: str,
-    slices: list[EvalSlice],
-    candidates: list[CandidateResult],
-    frontier: list[CandidateResult],
-    dimensions: list[SweepDimension],
-    sample_method: str,
-    family_objectives: list[FamilyObjective],
-    random_seeds: tuple[int, ...],
-    stability_report: dict[str, Any] | None = None,
-) -> str:
-    lines = [
-        "# Frontier Sweep Report",
-        "",
-        f"Generated: {exported_at}",
-        f"Sampling method: {sample_method}",
-        f"Optimization random seeds: {','.join(str(seed) for seed in random_seeds)}",
-        f"Candidates evaluated: {len(candidates)}",
-        f"Frontier size: {len(frontier)}",
-        "",
-        "## Objective Slices",
-        "",
-        "| Slice | Weight | Seeds | Perturbations |",
-        "| --- | ---: | --- | --- |",
-    ]
-    for slice_cfg in slices:
-        lines.append(
-            "| {name} | {weight:.3f} | {seeds} | {styles} |".format(
-                name=slice_cfg.name,
-                weight=slice_cfg.weight,
-                seeds=",".join(str(seed) for seed in slice_cfg.seeds),
-                styles=",".join(slice_cfg.perturbation_styles) if slice_cfg.perturbation_styles else "-",
+@dataclass
+class FrontierCheckpointStore:
+    path: Path | None
+    config_signature: str
+    config_payload: dict[str, Any]
+    state: dict[str, Any] | None
+    runs_by_seed: dict[int, dict[str, Any]]
+
+    @classmethod
+    def create(
+        cls,
+        *,
+        path: Path | None,
+        config_payload: dict[str, Any],
+        log_progress: bool,
+    ) -> "FrontierCheckpointStore":
+        config_signature = _stable_config_signature(config_payload)
+        if path is None:
+            return cls(
+                path=None,
+                config_signature=config_signature,
+                config_payload=config_payload,
+                state=None,
+                runs_by_seed={},
             )
-        )
 
-    lines.extend(["", "## Sweep Dimensions", ""])
-    for dimension in dimensions:
-        lines.append(
-            f"- `{dimension.key}`: [{dimension.min_value:g}, {dimension.max_value:g}] ({dimension.value_type})"
-        )
-
-    if family_objectives:
-        lines.extend(["", "## Family Objectives", ""])
-        for objective in family_objectives:
-            lines.append(f"- `{objective.family}:{objective.metric}:{objective.direction}`")
-
-    lines.extend(
-        [
-            "",
-            "## Pareto Frontier",
-            "",
-            "| Candidate | Utility | Slot Gain | Keyword Gain | Win Rate | Token Delta |",
-            "| --- | ---: | ---: | ---: | ---: | ---: |",
-        ]
-    )
-    for row in frontier:
-        slot_ci = row.objective_seed_statistics.get("global.slot_gain", {})
-        token_ci = row.objective_seed_statistics.get("global.token_delta", {})
-        slot_ci_text = f"[{slot_ci.get('ci95_low', 0.0):.3f}, {slot_ci.get('ci95_high', 0.0):.3f}]"
-        token_ci_text = f"[{token_ci.get('ci95_low', 0.0):.3f}, {token_ci.get('ci95_high', 0.0):.3f}]"
-        lines.append(
-            "| {candidate} | {utility:.3f} | {slot_gain:.3f} {slot_ci} | {kw_gain:.3f} | {win_rate:.3f} | {token_delta:.3f} {token_ci} |".format(
-                candidate=row.candidate_id,
-                utility=row.utility_score,
-                slot_gain=row.objective_vector.get("global.slot_gain", 0.0),
-                slot_ci=slot_ci_text,
-                kw_gain=row.objective_vector.get("global.keyword_gain", 0.0),
-                win_rate=row.objective_vector.get("global.hierarchy_win_rate", 0.0),
-                token_delta=row.objective_vector.get("global.token_delta", 0.0),
-                token_ci=token_ci_text,
-            )
-        )
-
-    lines.extend(
-        [
-            "",
-            "## Top Candidates",
-            "",
-            "| Candidate | Frontier | Utility | Worst Slot Gain | Worst Keyword Gain | Flat Win Penalty |",
-            "| --- | --- | ---: | ---: | ---: | ---: |",
-        ]
-    )
-    frontier_ids = {item.candidate_id for item in frontier}
-    for row in candidates[: min(25, len(candidates))]:
-        lines.append(
-            "| {candidate} | {is_frontier} | {utility:.3f} | {worst_slot:.3f} | {worst_kw:.3f} | {flat_penalty:.3f} |".format(
-                candidate=row.candidate_id,
-                is_frontier="yes" if row.candidate_id in frontier_ids else "no",
-                utility=row.utility_score,
-                worst_slot=row.objective_vector.get("robust.worst_slot_gain", 0.0),
-                worst_kw=row.objective_vector.get("robust.worst_keyword_gain", 0.0),
-                flat_penalty=row.objective_vector.get("global.flat_win_penalty", 0.0),
-            )
-        )
-
-    if stability_report:
-        lines.extend(["", "## Stability Report", ""])
-        lines.append(f"- Mode count across runs: {stability_report.get('mode_count', 0)}")
-        lines.append(
-            "- Average pairwise mode Jaccard: "
-            f"{float(stability_report.get('average_pairwise_mode_jaccard', 0.0)):.3f}"
-        )
-        lines.extend(
-            [
-                "",
-                "| Mode | Appearance Rate | Run Count | Candidate Occurrences | Slot Gain Range | Token Delta Range |",
-                "| --- | ---: | ---: | ---: | ---: | ---: |",
-            ]
-        )
-        for mode in stability_report.get("modes", []):
-            movement = mode.get("metric_movement", {})
-            slot_range = movement.get("global.slot_gain", {}).get("range", 0.0)
-            token_range = movement.get("global.token_delta", {}).get("range", 0.0)
-            lines.append(
-                "| {mode_id} | {appearance_rate:.3f} | {run_count} | {occurrences} | {slot_range:.4f} | {token_range:.4f} |".format(
-                    mode_id=mode.get("mode_id", "-"),
-                    appearance_rate=float(mode.get("appearance_rate", 0.0)),
-                    run_count=len(mode.get("run_indices", [])),
-                    occurrences=int(mode.get("candidate_occurrence_count", 0)),
-                    slot_range=float(slot_range),
-                    token_range=float(token_range),
+        runs_by_seed: dict[int, dict[str, Any]] = {}
+        if path.exists():
+            state = _load_checkpoint(path)
+            existing_signature = str(state.get("config_signature", ""))
+            if existing_signature != config_signature:
+                raise ValueError(
+                    "Checkpoint config mismatch. Remove checkpoint file or use a different --checkpoint-path."
                 )
+            for run_payload in state.get("runs", []):
+                seed_value = int(run_payload.get("random_seed"))
+                runs_by_seed[seed_value] = run_payload
+            _log(
+                f"loaded checkpoint from {path} with {len(runs_by_seed)} run entries.",
+                enabled=log_progress,
             )
-    return "\n".join(lines).rstrip() + "\n"
+            return cls(
+                path=path,
+                config_signature=config_signature,
+                config_payload=config_payload,
+                state=state,
+                runs_by_seed=runs_by_seed,
+            )
+
+        state = {
+            "format_version": CHECKPOINT_FORMAT_VERSION,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "config_signature": config_signature,
+            "config": config_payload,
+            "runs": [],
+        }
+        _write_checkpoint(path, state)
+        _log(f"initialized checkpoint at {path}.", enabled=log_progress)
+        return cls(
+            path=path,
+            config_signature=config_signature,
+            config_payload=config_payload,
+            state=state,
+            runs_by_seed=runs_by_seed,
+        )
+
+    def _persist(self) -> None:
+        if self.path is None or self.state is None:
+            return
+        _write_checkpoint(self.path, self.state)
+
+    def _ensure_run_state(self, *, run_index: int, random_seed: int) -> dict[str, Any] | None:
+        if self.state is None:
+            return None
+        run_state = self.runs_by_seed.get(random_seed)
+        if run_state is not None:
+            return run_state
+        run_state = {
+            "run_index": run_index,
+            "random_seed": random_seed,
+            "status": "in_progress",
+            "completed_candidates": {},
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        self.runs_by_seed[random_seed] = run_state
+        self.state["runs"].append(run_state)
+        self.state["updated_at"] = datetime.now(timezone.utc).isoformat()
+        self._persist()
+        return run_state
+
+    def restored_candidates(self, *, run_index: int, random_seed: int) -> dict[str, CandidateResult]:
+        run_state = self._ensure_run_state(run_index=run_index, random_seed=random_seed)
+        if run_state is None:
+            return {}
+        restored_candidates: dict[str, CandidateResult] = {}
+        for candidate_id, candidate_payload in run_state.get("completed_candidates", {}).items():
+            restored = _candidate_from_checkpoint(candidate_payload)
+            if restored.candidate_id != candidate_id:
+                restored = CandidateResult(
+                    candidate_id=candidate_id,
+                    overrides=restored.overrides,
+                    objective_vector=restored.objective_vector,
+                    utility_score=restored.utility_score,
+                    slice_summaries=restored.slice_summaries,
+                    family_slice_metrics=restored.family_slice_metrics,
+                    slice_seed_statistics=restored.slice_seed_statistics,
+                    objective_seed_statistics=restored.objective_seed_statistics,
+                )
+            restored_candidates[candidate_id] = restored
+        return restored_candidates
+
+    def record_candidate(self, *, random_seed: int, result: CandidateResult) -> None:
+        if self.state is None:
+            return
+        run_state = self.runs_by_seed.get(random_seed)
+        if run_state is None:
+            return
+        completed = run_state.setdefault("completed_candidates", {})
+        completed[result.candidate_id] = _candidate_checkpoint_payload(result)
+        run_state["updated_at"] = datetime.now(timezone.utc).isoformat()
+        self.state["updated_at"] = run_state["updated_at"]
+        self._persist()
+
+    def mark_run_completed(self, *, random_seed: int, frontier_candidate_ids: list[str]) -> None:
+        if self.state is None:
+            return
+        run_state = self.runs_by_seed.get(random_seed)
+        if run_state is None:
+            return
+        run_state["status"] = "completed"
+        run_state["frontier_candidate_ids"] = frontier_candidate_ids
+        run_state["updated_at"] = datetime.now(timezone.utc).isoformat()
+        self.state["updated_at"] = run_state["updated_at"]
+        self._persist()
 
 
 def run_frontier_sweep(
@@ -1409,6 +1426,8 @@ def run_frontier_sweep(
     log_every_candidates: int,
     log_every_scenarios: int,
 ) -> dict[str, Any]:
+    """Run full frontier workflow
+    Repeats sweeps for stability analysis then builds export payload"""
     base_policy = load_query_routing_policy(Path(os.getenv("PROJECT_QUERY_ROUTING_POLICY_PATH", str(QUERY_ROUTING_POLICY_PATH))))
     run_seeds = list(optimization_random_seeds or (random_seed,))
     if not run_seeds:
@@ -1459,34 +1478,11 @@ def run_frontier_sweep(
         "scenario_limit": scenario_limit,
         "pareto_epsilon": pareto_epsilon,
     }
-    checkpoint_signature = _stable_config_signature(checkpoint_config)
-    checkpoint_state: dict[str, Any] | None = None
-    runs_by_seed: dict[int, dict[str, Any]] = {}
-    if checkpoint_path is not None:
-        if checkpoint_path.exists():
-            checkpoint_state = _load_checkpoint(checkpoint_path)
-            existing_signature = str(checkpoint_state.get("config_signature", ""))
-            if existing_signature != checkpoint_signature:
-                raise ValueError(
-                    "Checkpoint config mismatch. Remove checkpoint file or use a different --checkpoint-path."
-                )
-            for run_payload in checkpoint_state.get("runs", []):
-                seed_value = int(run_payload.get("random_seed"))
-                runs_by_seed[seed_value] = run_payload
-            _log(
-                f"loaded checkpoint from {checkpoint_path} with {len(runs_by_seed)} run entries.",
-                enabled=log_progress,
-            )
-        else:
-            checkpoint_state = {
-                "format_version": CHECKPOINT_FORMAT_VERSION,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "config_signature": checkpoint_signature,
-                "config": checkpoint_config,
-                "runs": [],
-            }
-            _write_checkpoint(checkpoint_path, checkpoint_state)
-            _log(f"initialized checkpoint at {checkpoint_path}.", enabled=log_progress)
+    checkpoint_store = FrontierCheckpointStore.create(
+        path=checkpoint_path,
+        config_payload=checkpoint_config,
+        log_progress=log_progress,
+    )
 
     _log(
         (
@@ -1505,45 +1501,15 @@ def run_frontier_sweep(
 
     sweep_started = time.monotonic()
     runs: list[SweepRunResult] = []
+    # iterate optimizer seeds for stability analysis
     for run_index, seed_value in enumerate(deduped_run_seeds, start=1):
-        run_checkpoint: dict[str, Any] | None = runs_by_seed.get(seed_value)
-        if run_checkpoint is None and checkpoint_state is not None:
-            run_checkpoint = {
-                "run_index": run_index - 1,
-                "random_seed": seed_value,
-                "status": "in_progress",
-                "completed_candidates": {},
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-            }
-            runs_by_seed[seed_value] = run_checkpoint
-            checkpoint_state["runs"].append(run_checkpoint)
-            checkpoint_state["updated_at"] = datetime.now(timezone.utc).isoformat()
-            _write_checkpoint(checkpoint_path, checkpoint_state)
-        restored_candidates: dict[str, CandidateResult] = {}
-        if run_checkpoint is not None:
-            for candidate_id, candidate_payload in run_checkpoint.get("completed_candidates", {}).items():
-                restored = _candidate_from_checkpoint(candidate_payload)
-                if restored.candidate_id != candidate_id:
-                    restored = CandidateResult(
-                        candidate_id=candidate_id,
-                        overrides=restored.overrides,
-                        objective_vector=restored.objective_vector,
-                        utility_score=restored.utility_score,
-                        slice_summaries=restored.slice_summaries,
-                        family_slice_metrics=restored.family_slice_metrics,
-                        slice_seed_statistics=restored.slice_seed_statistics,
-                        objective_seed_statistics=restored.objective_seed_statistics,
-                    )
-                restored_candidates[candidate_id] = restored
+        restored_candidates = checkpoint_store.restored_candidates(
+            run_index=run_index - 1,
+            random_seed=seed_value,
+        )
 
         def _on_candidate_complete(result: CandidateResult) -> None:
-            if checkpoint_state is None or run_checkpoint is None or checkpoint_path is None:
-                return
-            completed = run_checkpoint.setdefault("completed_candidates", {})
-            completed[result.candidate_id] = _candidate_checkpoint_payload(result)
-            run_checkpoint["updated_at"] = datetime.now(timezone.utc).isoformat()
-            checkpoint_state["updated_at"] = run_checkpoint["updated_at"]
-            _write_checkpoint(checkpoint_path, checkpoint_state)
+            checkpoint_store.record_candidate(random_seed=seed_value, result=result)
 
         _log(
             f"starting optimization run {run_index}/{len(deduped_run_seeds)} with random_seed={seed_value}.",
@@ -1563,119 +1529,38 @@ def run_frontier_sweep(
             pareto_epsilon=pareto_epsilon,
             candidate_workers=candidate_workers,
             resume_candidates=restored_candidates,
-            on_candidate_complete=_on_candidate_complete if checkpoint_state is not None else None,
+            on_candidate_complete=_on_candidate_complete if checkpoint_store.state is not None else None,
             log_progress=log_progress,
             log_every_candidates=log_every_candidates,
             log_every_scenarios=log_every_scenarios,
         )
         runs.append(run_result)
-        if checkpoint_state is not None and run_checkpoint is not None and checkpoint_path is not None:
-            run_checkpoint["status"] = "completed"
-            run_checkpoint["frontier_candidate_ids"] = [item.candidate_id for item in run_result.frontier]
-            run_checkpoint["updated_at"] = datetime.now(timezone.utc).isoformat()
-            checkpoint_state["updated_at"] = run_checkpoint["updated_at"]
-            _write_checkpoint(checkpoint_path, checkpoint_state)
+        checkpoint_store.mark_run_completed(
+            random_seed=seed_value,
+            frontier_candidate_ids=[item.candidate_id for item in run_result.frontier],
+        )
         _log(
             f"finished optimization run {run_index}/{len(deduped_run_seeds)} with frontier_size={len(run_result.frontier)}.",
             enabled=log_progress,
         )
 
-    primary_run = runs[0]
-    evaluated = primary_run.candidates
-    frontier_rows = primary_run.frontier
     stability_report, assignment_lookup = _frontier_stability_report(runs, mode_match_threshold=mode_match_threshold)
-    exported_at = datetime.now(timezone.utc).isoformat()
-    primary_frontier_ids = {item.candidate_id for item in frontier_rows}
-
-    payload = {
-        "exported_at": exported_at,
-        "report_type": "frontier_sweep_report",
-        "summary": {
-            "candidate_count": len(evaluated),
-            "frontier_count": len(frontier_rows),
-            "sample_method": sample_method,
-            "max_candidates_requested": max_candidates,
-            "random_seed": primary_run.random_seed,
-            "optimization_run_count": len(runs),
-            "optimization_random_seeds": list(deduped_run_seeds),
-            "quick_scenarios": use_quick_scenarios,
-            "scenario_limit": scenario_limit,
-            "pareto_epsilon": pareto_epsilon,
-            "mode_match_threshold": mode_match_threshold,
-            "slice_names": [item.name for item in slices],
-            "families": list(families) if families else None,
-            "objective_key_count": len({key for item in evaluated for key in item.objective_vector.keys()}),
-            "global_slot_gain_mean": statistics.fmean(item.objective_vector.get("global.slot_gain", 0.0) for item in evaluated)
-            if evaluated
-            else 0.0,
-            "global_keyword_gain_mean": statistics.fmean(item.objective_vector.get("global.keyword_gain", 0.0) for item in evaluated)
-            if evaluated
-            else 0.0,
-            "global_token_delta_mean": statistics.fmean(item.objective_vector.get("global.token_delta", 0.0) for item in evaluated)
-            if evaluated
-            else 0.0,
-        },
-        "slices": [
-            {
-                "name": item.name,
-                "weight": item.weight,
-                "seeds": list(item.seeds),
-                "perturbation_styles": list(item.perturbation_styles),
-            }
-            for item in slices
-        ],
-        "dimensions": [
-            {
-                "key": item.key,
-                "min": item.min_value,
-                "max": item.max_value,
-                "type": item.value_type,
-            }
-            for item in dimensions
-        ],
-        "family_objectives": [
-            {"family": item.family, "metric": item.metric, "direction": item.direction}
-            for item in family_objectives
-        ],
-        "frontier_candidate_ids": [item.candidate_id for item in frontier_rows],
-        "stability_report": stability_report,
-        "optimization_runs": [
-            {
-                "run_index": run_index,
-                "random_seed": run.random_seed,
-                "candidate_count": len(run.candidates),
-                "frontier_count": len(run.frontier),
-                "frontier_candidate_ids": [item.candidate_id for item in run.frontier],
-                "frontier_candidates": [
-                    _candidate_json_payload(
-                        item,
-                        is_frontier=True,
-                        mode_id=assignment_lookup.get((run_index, item.candidate_id)),
-                    )
-                    for item in run.frontier
-                ],
-            }
-            for run_index, run in enumerate(runs)
-        ],
-        "candidates": [
-            _candidate_json_payload(
-                item,
-                is_frontier=item.candidate_id in primary_frontier_ids,
-                mode_id=assignment_lookup.get((0, item.candidate_id)),
-            )
-            for item in evaluated
-        ],
-    }
-    payload["markdown"] = _render_markdown(
-        exported_at=exported_at,
+    payload = build_frontier_report_payload(
+        runs=runs,
         slices=slices,
-        candidates=evaluated,
-        frontier=frontier_rows,
         dimensions=dimensions,
-        sample_method=sample_method,
+        families=families,
         family_objectives=family_objectives,
-        random_seeds=deduped_run_seeds,
-        stability_report=stability_report if len(runs) > 1 else None,
+        sample_method=sample_method,
+        max_candidates=max_candidates,
+        deduped_run_seeds=deduped_run_seeds,
+        use_quick_scenarios=use_quick_scenarios,
+        scenario_limit=scenario_limit,
+        pareto_epsilon=pareto_epsilon,
+        mode_match_threshold=mode_match_threshold,
+        stability_report=stability_report,
+        assignment_lookup=assignment_lookup,
+        candidate_payload_builder=_candidate_json_payload,
     )
     _log(
         f"frontier sweep complete in {(time.monotonic() - sweep_started)/60.0:.1f}m.",
@@ -1685,6 +1570,8 @@ def run_frontier_sweep(
 
 
 def main() -> None:
+    """CLI entrypoint
+    Parses sweep args executes run and writes report artifacts"""
     parser = argparse.ArgumentParser(description="Run a large frontier sweep with multi-slice objectives.")
     parser.add_argument(
         "--seed",
