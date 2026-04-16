@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Test module overview for conftest
+Covers behavior and regression checks"""
+
 import os
 
 import pytest

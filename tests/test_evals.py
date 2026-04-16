@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Test module overview for test evals
+Covers behavior and regression checks"""
+
 from packages.evals.runner import run_scenario, run_selected
 from packages.evals.scenarios import (
     QUICK_SCENARIO_FAMILIES,

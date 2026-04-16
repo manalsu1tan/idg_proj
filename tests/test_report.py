@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Test module overview for test report
+Covers behavior and regression checks"""
+
 import json
 
 from packages.evals.report import build_report_payload, export_report

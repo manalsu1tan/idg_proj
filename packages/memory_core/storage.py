@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Persistence layer and ORM models
+Reads writes nodes traces and eval records"""
+
 import json
 import uuid
 from contextlib import contextmanager
@@ -7,8 +10,7 @@ from datetime import datetime
 from typing import Iterator
 
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Text, create_engine, select
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from packages.memory_core.utils import (
     extract_entities,
@@ -48,6 +50,7 @@ Base = declarative_base()
 
 
 def embedding_column_type():
+    """Return db type for embedding storage"""
     if PGVECTOR_AVAILABLE:
         return Vector(12)
     return Text
@@ -138,6 +141,9 @@ class ModelTraceRecord(Base):
 
 
 class Database:
+    """Database wrapper for engine and sessions
+    Owns transaction lifecycle and shared session factory setup"""
+
     def __init__(self, url: str) -> None:
         self.engine = create_engine(url, future=True)
         self.session_factory = sessionmaker(bind=self.engine, expire_on_commit=False, class_=Session)
@@ -159,6 +165,9 @@ class Database:
 
 
 class MemoryStore:
+    """Persistence facade for memory tree data
+    Reads writes nodes traces lineage and eval artifacts"""
+
     def __init__(self, db: Database, prompt_version: str, model_version: str) -> None:
         self.db = db
         self.prompt_version = prompt_version

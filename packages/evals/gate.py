@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Quality gate checks for eval outputs
+Validates thresholds and emits pass fail status"""
+
 import argparse
 import json
 import statistics

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Test module overview for test gate
+Covers behavior and regression checks"""
+
 from packages.evals.gate import run_generalization_gate
 from packages.memory_core.services import MemoryService
 

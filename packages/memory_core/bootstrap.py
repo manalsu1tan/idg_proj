@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Service bootstrap helpers
+Creates singleton memory service for app entrypoints"""
+
 from functools import lru_cache
 
 from packages.memory_core.services import MemoryService

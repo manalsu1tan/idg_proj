@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Seeded data helpers for eval setup
+Creates deterministic memory fixtures"""
+
 import argparse
 import json
 

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Scenario catalog and perturbation helpers
+Defines fixtures seeds and scenario transforms"""
+
 import random
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta

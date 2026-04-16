@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Runtime config loader
+Parses env vars defaults and routing policy files"""
+
 import json
 import os
 from dataclasses import dataclass, field
@@ -13,6 +16,8 @@ QUERY_ROUTING_POLICY_PATH = ROOT_DIR / "configs" / "policies" / "query_routing_p
 
 
 def load_dotenv_file(path: Path = ENV_PATH) -> None:
+    """Load env values from .env style file
+    Preserves existing process env and only sets missing keys"""
     if not path.exists():
         return
     for raw_line in path.read_text(encoding="utf-8").splitlines():
@@ -28,6 +33,7 @@ def load_dotenv_file(path: Path = ENV_PATH) -> None:
 
 
 def _default_query_routing_policy() -> dict[str, Any]:
+    """Return fallback routing policy when file is missing"""
     return {
         "feature_triggers": {
             "temporal_cue": [
@@ -157,6 +163,7 @@ def _default_query_routing_policy() -> dict[str, Any]:
 
 
 def load_query_routing_policy(path: Path = QUERY_ROUTING_POLICY_PATH) -> dict[str, Any]:
+    """Load routing policy json with fallback defaults"""
     if not path.exists():
         return _default_query_routing_policy()
     try:
@@ -184,6 +191,9 @@ def load_query_routing_policy(path: Path = QUERY_ROUTING_POLICY_PATH) -> dict[st
 
 @dataclass(frozen=True)
 class Settings:
+    """Runtime settings container
+    Central source for db model prompt and policy config values"""
+
     database_url: str = field(default_factory=lambda: os.getenv("PROJECT_DATABASE_URL", "sqlite+pysqlite:///./project_b.db"))
     prompt_version: str = field(default_factory=lambda: os.getenv("PROJECT_PROMPT_VERSION", "v1"))
     model_version: str = field(default_factory=lambda: os.getenv("PROJECT_MODEL_VERSION", "heuristic-v1"))
@@ -219,5 +229,7 @@ class Settings:
 
 
 def load_settings() -> Settings:
+    """Load and materialize Settings from env and policy file inputs
+    Used by service bootstrap API and eval entrypoints"""
     load_dotenv_file()
     return Settings()

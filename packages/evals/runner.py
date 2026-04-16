@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Scenario runner entrypoints
+Executes eval scenarios and computes metrics"""
+
 import argparse
 import json
 import statistics
@@ -21,12 +24,14 @@ from packages.schemas.models import BuildSummariesRequest, EvalMetric, EvalRunRe
 
 
 def keyword_recall(text: str, expected_keywords: list[str]) -> float:
+    """Compute keyword recall score"""
     lowered = text.lower()
     matches = sum(1 for keyword in expected_keywords if keyword.lower() in lowered)
     return matches / max(len(expected_keywords), 1)
 
 
 def metric(name: str, value: float, **details) -> EvalMetric:
+    """Small helper to build EvalMetric"""
     return EvalMetric(name=name, value=value, details=details)
 
 
@@ -35,6 +40,7 @@ def _normalized_text(text: str) -> str:
 
 
 def slot_recall(text: str, expected_slots: dict[str, list[str]]) -> tuple[float, dict[str, float]]:
+    """Compute slot level recall map and mean score"""
     lowered = _normalized_text(text)
     per_slot: dict[str, float] = {}
     for slot_name, expected_values in expected_slots.items():
@@ -45,7 +51,7 @@ def slot_recall(text: str, expected_slots: dict[str, list[str]]) -> tuple[float,
 
 
 def _recall_text(response) -> str:
-    # Recall should be measured from retrieved evidence only, not from the echoed query line.
+    # measure recall from retrieved evidence only
     snippets: list[str] = []
     seen_ids: set[str] = set()
     for item in response.retrieved_nodes:
@@ -58,6 +64,8 @@ def _recall_text(response) -> str:
 
 
 def run_scenario_instance(service: MemoryService, scenario: Scenario) -> EvalRunResult:
+    """Run one scenario end to end
+    Ingests events builds summaries runs flat and hierarchy retrieval then records eval"""
     for event in scenario.events:
         service.agent_loop.observe(
             agent_id=scenario.agent_id,
@@ -181,6 +189,8 @@ def run_scenario(service: MemoryService, scenario_name: str) -> EvalRunResult:
 
 
 def run_all() -> list[EvalRunResult]:
+    """Run complete scenario catalog with default config
+    Creates fresh service instances per scenario for isolation"""
     results = []
     for scenario in all_scenarios():
         results.append(run_scenario_instance(MemoryService(load_settings()), scenario))
@@ -196,6 +206,8 @@ def run_selected(
     paraphrase_styles: tuple[str, ...] | None = None,
     service: MemoryService | None = None,
 ) -> list[EvalRunResult]:
+    """Run filtered scenario subset
+    Supports seed family scenario name quick mode and paraphrase variants"""
     service = service or MemoryService(load_settings())
     if scenario_names:
         selected = [get_scenario(name, seeds=seeds) for name in scenario_names]
@@ -212,6 +224,7 @@ def run_selected(
 
 
 def main() -> None:
+    """CLI entrypoint for eval runner"""
     parser = argparse.ArgumentParser(description="Run benchmark eval scenarios.")
     parser.add_argument(
         "--seed",

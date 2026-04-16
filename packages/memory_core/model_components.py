@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Model backed summarizer and verifier
+Transforms prompts into typed summary and quality outputs"""
+
 import sys
 import uuid
 from datetime import datetime
@@ -19,6 +22,8 @@ from packages.schemas.models import (
 
 
 def build_model_client(settings: Settings) -> tuple[ModelClient, ModelProvider]:
+    """Build active model client from runtime settings
+    Falls back to mock provider when external credentials are unavailable"""
     if settings.model_provider == ModelProvider.OPENAI_COMPATIBLE.value:
         if not settings.model_api_key:
             print(
@@ -40,6 +45,9 @@ def build_model_client(settings: Settings) -> tuple[ModelClient, ModelProvider]:
 
 
 class ModelBackedSummarizer:
+    """Model backed summarizer component
+    Formats child node payload applies token caps and records model trace metadata"""
+
     def __init__(self, client: ModelClient, provider: ModelProvider, settings: Settings) -> None:
         self.client = client
         self.provider = provider
@@ -47,6 +55,7 @@ class ModelBackedSummarizer:
         self.prompt = load_prompt("summary_prompt.md")
 
     def generate(self, agent_id: str, child_nodes: list[MemoryNode]) -> tuple[SummaryResult, ModelTrace]:
+        """Generate capped summary and model trace"""
         summary_token_cap = self._summary_token_cap(child_nodes)
         request_payload = {
             "child_nodes": [
@@ -101,6 +110,7 @@ class ModelBackedSummarizer:
         return result, trace
 
     def _summary_token_cap(self, child_nodes: list[MemoryNode]) -> int:
+        """Raise token cap for social and relationship heavy clusters"""
         combined = " ".join(node.text for node in child_nodes).lower()
         if any(
             token in combined
@@ -124,6 +134,9 @@ class ModelBackedSummarizer:
 
 
 class ModelBackedVerifier:
+    """Model backed verifier component
+    Scores summary support quality and emits structured verification traces"""
+
     def __init__(self, client: ModelClient, provider: ModelProvider, settings: Settings) -> None:
         self.client = client
         self.provider = provider
@@ -131,6 +144,7 @@ class ModelBackedVerifier:
         self.prompt = load_prompt("verifier_prompt.md")
 
     def verify(self, agent_id: str, summary: MemoryNode, supports: list[MemoryNode]) -> tuple[VerificationResult, ModelTrace]:
+        """Verify summary quality against supporting nodes"""
         request_payload = {
             "summary": {
                 "node_id": summary.node_id,
