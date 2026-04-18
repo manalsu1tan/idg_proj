@@ -129,6 +129,8 @@ class RetrieveRequest(BaseModel):
     mode: QueryMode = QueryMode.BALANCED
     token_budget: int = 180
     branch_limit: int = 3
+    generate_answer: bool = True
+    verify_answer: bool = False
 
 
 class RetrievedNode(BaseModel):
@@ -193,6 +195,8 @@ class RetrieveResponse(BaseModel):
     trace_id: str | None = None
     trace_entries: list[RetrievalTraceEntry] = Field(default_factory=list)
     diagnostics: RetrievalDiagnostics = Field(default_factory=RetrievalDiagnostics)
+    answer: "AnswerResult | None" = None
+    answer_verification: "VerificationResult | None" = None
 
 
 class BuildSummariesRequest(BaseModel):
@@ -283,6 +287,15 @@ class SummaryResult(BaseModel):
     raw_response: dict[str, Any] = Field(default_factory=dict)
 
 
+class AnswerResult(BaseModel):
+    text: str
+    citations: list[str] = Field(default_factory=list)
+    confidence: float = 0.0
+    prompt_version: str | None = None
+    model_version: str | None = None
+    raw_response: dict[str, Any] = Field(default_factory=dict)
+
+
 class VerificationResult(BaseModel):
     quality_status: QualityStatus
     unsupported_claims: list[str] = Field(default_factory=list)
@@ -323,3 +336,8 @@ if hasattr(TreeNode, "model_rebuild"):
     TreeNode.model_rebuild()
 else:
     TreeNode.update_forward_refs()
+
+if hasattr(RetrieveResponse, "model_rebuild"):
+    RetrieveResponse.model_rebuild()
+else:
+    RetrieveResponse.update_forward_refs(AnswerResult=AnswerResult, VerificationResult=VerificationResult)

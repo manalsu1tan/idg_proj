@@ -195,12 +195,19 @@ class Settings:
     Central source for db model prompt and policy config values"""
 
     database_url: str = field(default_factory=lambda: os.getenv("PROJECT_DATABASE_URL", "sqlite+pysqlite:///./project_b.db"))
+    database_fallback_url: str = field(
+        default_factory=lambda: os.getenv("PROJECT_DATABASE_FALLBACK_URL", "sqlite+pysqlite:///./project_b.db")
+    )
+    database_fallback_on_unavailable: bool = field(
+        default_factory=lambda: os.getenv("PROJECT_DATABASE_FALLBACK_ON_UNAVAILABLE", "true").lower() == "true"
+    )
     prompt_version: str = field(default_factory=lambda: os.getenv("PROJECT_PROMPT_VERSION", "v1"))
     model_version: str = field(default_factory=lambda: os.getenv("PROJECT_MODEL_VERSION", "heuristic-v1"))
     model_provider: str = field(default_factory=lambda: os.getenv("PROJECT_MODEL_PROVIDER", "openai_compatible"))
     model_base_url: str = field(default_factory=lambda: os.getenv("PROJECT_MODEL_BASE_URL", "https://api.openai.com/v1"))
     model_api_key: str = field(default_factory=lambda: os.getenv("PROJECT_MODEL_API_KEY", ""))
     summary_model: str = field(default_factory=lambda: os.getenv("PROJECT_SUMMARY_MODEL", "gpt-5-nano"))
+    answer_model: str = field(default_factory=lambda: os.getenv("PROJECT_ANSWER_MODEL", "gpt-5-nano"))
     verifier_model: str = field(default_factory=lambda: os.getenv("PROJECT_VERIFIER_MODEL", "gpt-5-nano"))
     model_timeout_seconds: float = field(default_factory=lambda: float(os.getenv("PROJECT_MODEL_TIMEOUT_SECONDS", "30")))
     model_max_retries: int = field(default_factory=lambda: int(os.getenv("PROJECT_MODEL_MAX_RETRIES", "3")))

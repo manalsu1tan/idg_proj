@@ -12,6 +12,7 @@ from packages.memory_core.prompts import load_prompt
 from packages.memory_core.settings import Settings
 from packages.memory_core.utils import extract_entities, token_count, truncate_to_token_count, unique_topics
 from packages.schemas.models import (
+    AnswerResult,
     MemoryNode,
     ModelProvider,
     ModelTrace,
@@ -133,6 +134,76 @@ class ModelBackedSummarizer:
         return self.settings.summary_max_tokens
 
 
+class ModelBackedAnswerer:
+    """Model backed answer generation component
+    Produces a concise answer grounded only in retrieved context"""
+
+    def __init__(self, client: ModelClient, provider: ModelProvider, settings: Settings) -> None:
+        self.client = client
+        self.provider = provider
+        self.settings = settings
+        self.prompt = load_prompt("answer_prompt.md")
+
+    def generate(
+        self,
+        agent_id: str,
+        query: str,
+        retrieved_nodes: list[MemoryNode],
+        packed_context: str,
+    ) -> tuple[AnswerResult, ModelTrace]:
+        request_payload = {
+            "query": query,
+            "packed_context": packed_context,
+            "retrieved_nodes": [
+                {
+                    "node_id": node.node_id,
+                    "level": node.level.value,
+                    "node_type": node.node_type.value,
+                    "text": node.text,
+                    "timestamp_start": node.timestamp_start.isoformat(),
+                    "timestamp_end": node.timestamp_end.isoformat(),
+                    "entities": node.entities,
+                    "topics": node.topics,
+                }
+                for node in retrieved_nodes
+            ],
+        }
+        if not retrieved_nodes:
+            response_payload = {
+                "text": "I don't have enough retrieved evidence to answer that yet.",
+                "citations": [],
+                "confidence": 0.0,
+            }
+        else:
+            response_payload = self.client.generate_json(
+                component="answerer",
+                model_name=self.settings.answer_model,
+                system_prompt=self.prompt,
+                user_payload=request_payload,
+            )
+        result = AnswerResult(
+            text=str(response_payload.get("text", "")).strip(),
+            citations=response_payload.get("citations", []),
+            confidence=float(response_payload.get("confidence", 0.0)),
+            prompt_version=self.settings.prompt_version,
+            model_version=self.settings.answer_model,
+            raw_response=response_payload,
+        )
+        trace = ModelTrace(
+            trace_id=str(uuid.uuid4()),
+            node_id=None,
+            agent_id=agent_id,
+            component="answerer",
+            provider=self.provider,
+            model_name=self.settings.answer_model,
+            prompt_version=self.settings.prompt_version,
+            created_at=datetime.utcnow(),
+            request_payload=request_payload,
+            response_payload=response_payload,
+        )
+        return result, trace
+
+
 class ModelBackedVerifier:
     """Model backed verifier component
     Scores summary support quality and emits structured verification traces"""
@@ -149,6 +220,8 @@ class ModelBackedVerifier:
             "summary": {
                 "node_id": summary.node_id,
                 "text": summary.text,
+                "timestamp_start": summary.timestamp_start.isoformat(),
+                "timestamp_end": summary.timestamp_end.isoformat(),
                 "entities": summary.entities,
                 "topics": summary.topics,
             },
@@ -156,6 +229,8 @@ class ModelBackedVerifier:
                 {
                     "node_id": node.node_id,
                     "text": node.text,
+                    "timestamp_start": node.timestamp_start.isoformat(),
+                    "timestamp_end": node.timestamp_end.isoformat(),
                     "entities": node.entities,
                     "topics": node.topics,
                 }
@@ -183,6 +258,72 @@ class ModelBackedVerifier:
             node_id=summary.node_id,
             agent_id=agent_id,
             component="verifier",
+            provider=self.provider,
+            model_name=self.settings.verifier_model,
+            prompt_version=self.settings.prompt_version,
+            created_at=datetime.utcnow(),
+            request_payload=request_payload,
+            response_payload=response_payload,
+        )
+        return result, trace
+
+
+class ModelBackedAnswerVerifier:
+    """Model backed answer verifier component
+    Evaluates grounded answer quality against retrieved support nodes"""
+
+    def __init__(self, client: ModelClient, provider: ModelProvider, settings: Settings) -> None:
+        self.client = client
+        self.provider = provider
+        self.settings = settings
+        self.prompt = load_prompt("answer_verifier_prompt.md")
+
+    def verify(
+        self,
+        agent_id: str,
+        query: str,
+        answer: AnswerResult,
+        supports: list[MemoryNode],
+    ) -> tuple[VerificationResult, ModelTrace]:
+        request_payload = {
+            "query": query,
+            "answer": {
+                "text": answer.text,
+                "citations": answer.citations,
+            },
+            "supports": [
+                {
+                    "node_id": node.node_id,
+                    "text": node.text,
+                    "timestamp_start": node.timestamp_start.isoformat(),
+                    "timestamp_end": node.timestamp_end.isoformat(),
+                    "entities": node.entities,
+                    "topics": node.topics,
+                }
+                for node in supports
+            ],
+        }
+        response_payload = self.client.generate_json(
+            component="answer_verifier",
+            model_name=self.settings.verifier_model,
+            system_prompt=self.prompt,
+            user_payload=request_payload,
+        )
+        result = VerificationResult(
+            quality_status=QualityStatus(response_payload.get("quality_status", QualityStatus.PENDING.value)),
+            unsupported_claims=response_payload.get("unsupported_claims", []),
+            contradictions=response_payload.get("contradictions", []),
+            omissions=response_payload.get("omissions", []),
+            scores=response_payload.get("scores", {}),
+            prompt_version=self.settings.prompt_version,
+            model_version=self.settings.verifier_model,
+            raw_response=response_payload,
+        )
+        trace = ModelTrace(
+            trace_id=str(uuid.uuid4()),
+            node_id=None,
+            agent_id=agent_id,
+            component="answer_verifier",
             provider=self.provider,
             model_name=self.settings.verifier_model,
             prompt_version=self.settings.prompt_version,

@@ -66,7 +66,7 @@ def delayed_commitment_scenario(seed: int) -> Scenario:
     rng = random.Random(seed)
     person = rng.choice(["Maria", "Nadia", "Leah", "Priya"])
     item = rng.choice(["finished prototype", "demo kit", "research brief", "launch deck"])
-    event = rng.choice(["Simile AI demo", "partner review", "investor showcase", "Friday product demo"])
+    event = rng.choice(["Smile demo", "partner review", "investor showcase", "Friday product demo"])
     routine_templates = [
         "reviewed dashboard metrics and ate lunch at the office",
         "worked through tickets and checked the sprint board",

@@ -4,11 +4,20 @@ from __future__ import annotations
 Composes storage models retrieval and API facing ops"""
 
 import json
+import logging
 import statistics
 import uuid
 from datetime import datetime, timedelta
 
-from packages.memory_core.model_components import ModelBackedSummarizer, ModelBackedVerifier, build_model_client
+from sqlalchemy.exc import OperationalError
+
+from packages.memory_core.model_components import (
+    ModelBackedAnswerVerifier,
+    ModelBackedAnswerer,
+    ModelBackedSummarizer,
+    ModelBackedVerifier,
+    build_model_client,
+)
 from packages.memory_core.retrieval.hierarchical import HierarchicalRetriever
 from packages.memory_core.retrieval.diagnostics import (
     build_retrieval_diagnostics,
@@ -48,6 +57,9 @@ from packages.schemas.models import (
     TimelineResponse,
     dump_model,
 )
+
+
+logger = logging.getLogger(__name__)
 
 class RefreshPolicy:
     """Marks affected summary parents as stale
@@ -204,12 +216,73 @@ class TreeBuilder:
             for token in ["updated", "changed", "now", "current", "latest", "revision", "correct", "obsolete", "instead"]
         )
 
+    def _contains_social_thread_signal(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(
+            token in lowered
+            for token in [
+                "prefer",
+                "preference",
+                "preferences",
+                "dislike",
+                "dislikes",
+                "hate",
+                "hates",
+                "agenda",
+                "agendas",
+                "expectation",
+                "expectations",
+                "written",
+                "check-in",
+                "check-ins",
+                "sync",
+                "syncs",
+                "improv",
+                "surprise",
+                "surprises",
+                "follow-up",
+                "communicat",
+                "approach",
+            ]
+        )
+
+    def _meaningful_cluster_entities(self, node: MemoryNode) -> set[str]:
+        stop_entities = {"follow", "day", "morning", "afternoon", "evening", "routine"}
+        return {entity.lower() for entity in node.entities if entity and entity.lower() not in stop_entities}
+
+    def _can_extend_social_thread_cluster(self, cluster: list[MemoryNode], node: MemoryNode) -> bool:
+        if not cluster:
+            return False
+        node_entities = self._meaningful_cluster_entities(node)
+        if not node_entities or not self._contains_social_thread_signal(node.text):
+            return False
+        cluster_entities = {entity for item in cluster for entity in self._meaningful_cluster_entities(item)}
+        if not (node_entities & cluster_entities):
+            return False
+        if not any(self._contains_social_thread_signal(item.text) for item in cluster):
+            return False
+        latest = cluster[-1]
+        social_thread_window = node.timestamp_start - latest.timestamp_end <= timedelta(
+            hours=max(self.settings.time_window_hours, 72)
+        )
+        return social_thread_window
+
     def _cluster_nodes(self, nodes: list[MemoryNode]) -> list[list[MemoryNode]]:
         if not nodes:
             return []
         clusters: list[list[MemoryNode]] = []
-        current: list[MemoryNode] = [nodes[0]]
-        for node in nodes[1:]:
+        for node in nodes:
+            social_target = next(
+                (cluster for cluster in reversed(clusters) if self._can_extend_social_thread_cluster(cluster, node)),
+                None,
+            )
+            if social_target is not None:
+                social_target.append(node)
+                continue
+            if not clusters:
+                clusters.append([node])
+                continue
+            current = clusters[-1]
             prev = current[-1]
             within_window = node.timestamp_start - prev.timestamp_end <= timedelta(hours=self.settings.time_window_hours)
             semantically_related = (
@@ -217,14 +290,26 @@ class TreeBuilder:
                 >= self.settings.cluster_similarity_threshold
             )
             shared_topic = bool(set(node.topics) & {topic for item in current for topic in item.topics})
-            shared_entity = bool(set(node.entities) & {entity for item in current for entity in item.entities})
+            shared_entity = bool(
+                self._meaningful_cluster_entities(node)
+                & {entity for item in current for entity in self._meaningful_cluster_entities(item)}
+            )
+            conflicting_social_thread = (
+                not shared_entity
+                and bool(self._meaningful_cluster_entities(node))
+                and any(self._meaningful_cluster_entities(item) for item in current)
+                and self._contains_social_thread_signal(node.text)
+                and any(self._contains_social_thread_signal(item.text) for item in current)
+            )
             important_context = max(item.importance_score for item in current + [node]) >= 0.8 and node.importance_score >= 0.6
-            if within_window and (semantically_related or shared_topic or shared_entity or important_context):
+            if (
+                within_window
+                and not conflicting_social_thread
+                and (semantically_related or shared_topic or shared_entity or important_context)
+            ):
                 current.append(node)
             else:
-                clusters.append(current)
-                current = [node]
-        clusters.append(current)
+                clusters.append([node])
         return clusters
 
 
@@ -278,19 +363,45 @@ class MemoryService:
     def __init__(self, settings: Settings) -> None:
         # wire core dependencies once per service instance
         self.settings = settings
-        self.db = Database(settings.database_url)
+        self.db = self._build_database(settings)
         self.store = MemoryStore(self.db, settings.prompt_version, settings.model_version)
-        if settings.auto_create_schema:
+        if settings.auto_create_schema or self._using_database_fallback:
             self.store.ensure_schema()
         model_client, provider = build_model_client(settings)
         self.summarizer = ModelBackedSummarizer(model_client, provider, settings)
         self.verifier = ModelBackedVerifier(model_client, provider, settings)
+        self.answerer = ModelBackedAnswerer(model_client, provider, settings)
+        self.answer_verifier = ModelBackedAnswerVerifier(model_client, provider, settings)
         self.refresh_policy = RefreshPolicy(self.store)
         self.flat_retriever = FlatRetriever(self.store)
         self.tree_builder = TreeBuilder(self.store, self.summarizer, self.verifier, settings)
         self.hierarchical_retriever = HierarchicalRetriever(self.store, self.flat_retriever, settings)
         self.context_packer = ContextPacker()
         self.agent_loop = AgentLoopAdapter(self)
+
+    def _build_database(self, settings: Settings) -> Database:
+        self._using_database_fallback = False
+        primary_db = Database(settings.database_url)
+        if not settings.database_url.startswith(("postgresql", "postgres")):
+            return primary_db
+        try:
+            primary_db.verify_connection()
+            return primary_db
+        except OperationalError:
+            fallback_url = settings.database_fallback_url
+            if (
+                not settings.database_fallback_on_unavailable
+                or not fallback_url
+                or fallback_url == settings.database_url
+            ):
+                raise
+            logger.warning(
+                "Primary database unavailable at %s; falling back to %s for local service startup.",
+                settings.database_url,
+                fallback_url,
+            )
+            self._using_database_fallback = True
+            return Database(fallback_url)
 
     def build_summaries(self, request: BuildSummariesRequest) -> list[MemoryNode]:
         """Build summaries for an agent"""
@@ -304,6 +415,8 @@ class MemoryService:
         mode: QueryMode,
         token_budget: int,
         branch_limit: int,
+        generate_answer: bool = True,
+        verify_answer: bool = False,
     ) -> RetrieveResponse:
         """Run hierarchical retrieval and persist trace"""
         retrieved, depth, trace_entries, routing_attribution = self.hierarchical_retriever.retrieve(
@@ -316,6 +429,24 @@ class MemoryService:
         )
         packed = self.context_packer.pack(query, retrieved, token_budget)
         diagnostics = build_retrieval_diagnostics(retrieved, trace_entries, packed, routing_attribution=routing_attribution)
+        answer_result = None
+        answer_verification = None
+        if generate_answer:
+            answer_result, answer_trace = self.answerer.generate(
+                agent_id=agent_id,
+                query=query,
+                retrieved_nodes=[item.node for item in retrieved],
+                packed_context=packed,
+            )
+            self.store.write_model_trace(answer_trace)
+            if verify_answer and answer_result.text.strip():
+                answer_verification, verification_trace = self.answer_verifier.verify(
+                    agent_id=agent_id,
+                    query=query,
+                    answer=answer_result,
+                    supports=[item.node for item in retrieved],
+                )
+                self.store.write_model_trace(verification_trace)
         trace = RetrievalTrace(
             trace_id=str(uuid.uuid4()),
             agent_id=agent_id,
@@ -353,6 +484,8 @@ class MemoryService:
             trace_id=trace.trace_id,
             trace_entries=trace_entries,
             diagnostics=diagnostics,
+            answer=answer_result,
+            answer_verification=answer_verification,
         )
 
     def retrieve_flat(
