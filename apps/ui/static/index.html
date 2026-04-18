@@ -4,23 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inspector</title>
-    <link rel="stylesheet" href="/ui/assets/styles.css" />
+    <link rel="stylesheet" href="/ui/assets/styles.css?v=20260418d" />
   </head>
   <body>
     <div class="page-shell">
       <header class="hero">
-        <div>
-          <p class="eyebrow">Project B</p>
+        <div class="hero-copy-block">
+          <p class="eyebrow">Project</p>
           <h1>Hierarchical Memory Inspector</h1>
           <p class="hero-copy">
             Inspect timelines, provenance chains, retrieval traces, model traces, and eval outcomes for the flat baseline and the
             hierarchical memory stack.
           </p>
+          <div class="hero-highlights">
+            <span class="hero-chip">Timeline provenance</span>
+            <span class="hero-chip">Retrieval branch inspection</span>
+            <span class="hero-chip">Eval drift visibility</span>
+          </div>
         </div>
         <form id="agent-form" class="agent-form">
-          <label for="agent-id">Agent ID</label>
-          <input id="agent-id" name="agent-id" type="text" value="benchmark-agent-delayed-commitment" />
-          <button type="submit">Load agent</button>
+          <div class="agent-form-header">
+            <label for="agent-id">Agent ID</label>
+            <p id="action-status" class="action-status" role="status" aria-live="polite">Ready</p>
+          </div>
+          <input id="agent-id" name="agent-id" type="text" value="demo-agent-stakeholder-handoff" />
+          <div class="agent-form-actions">
+            <button type="submit">Load agent</button>
+            <button id="build-summaries" type="button">Build summaries</button>
+            <button id="seed-complex-demo" type="button">Seed demo</button>
+          </div>
         </form>
       </header>
 
@@ -51,18 +63,31 @@
             <h2>Retrieval Lab</h2>
           </div>
           <form id="retrieve-form" class="retrieve-form">
+            <label for="demo-query-preset">Demo query set</label>
+            <select id="demo-query-preset" name="demo-query-preset"></select>
             <label for="query">Query</label>
-            <textarea id="query" name="query" rows="3">What did I promise Maria to bring for the Simile AI demo?</textarea>
+            <textarea id="query" name="query" rows="3">What communication strategy should I use with Sasha?</textarea>
             <label for="mode">Mode</label>
             <select id="mode" name="mode">
               <option value="balanced">balanced</option>
               <option value="summary_only">summary_only</option>
-              <option value="drill_down">drill_down</option>
+              <option value="drill_down" selected>drill_down</option>
             </select>
             <label for="token-budget">Token budget</label>
             <input id="token-budget" name="token-budget" type="number" value="120" />
+            <label class="checkbox-row" for="verify-answer">
+              <input id="verify-answer" name="verify-answer" type="checkbox" />
+              <span>Verify answer against retrieved context</span>
+            </label>
             <button type="submit">Run retrieval</button>
           </form>
+          <div class="panel-subheader">
+            <h3>Answer</h3>
+          </div>
+          <div id="answer-result" class="answer-result empty-state">Run a retrieval to generate a grounded answer.</div>
+          <div class="panel-subheader">
+            <h3>Retrieved context</h3>
+          </div>
           <div id="retrieval-result" class="retrieval-result empty-state">Run a retrieval to inspect packed context and branch choices.</div>
         </section>
       </main>
@@ -85,13 +110,13 @@
         <section class="panel">
           <div class="panel-header">
             <h2>Eval Runs</h2>
-            <button id="run-evals" type="button">Run evals</button>
+            <button id="run-evals" type="button">Run quick evals</button>
           </div>
           <div id="eval-runs" class="eval-list"></div>
         </section>
       </section>
     </div>
 
-    <script src="/ui/assets/app.js" type="module"></script>
+    <script src="/ui/assets/app.js?v=20260418d" type="module"></script>
   </body>
 </html>

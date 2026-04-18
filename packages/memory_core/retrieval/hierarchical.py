@@ -1009,16 +1009,19 @@ class HierarchicalRetriever:
 
         # For coverage-heavy prompts, add missing coverage leaves if the first pass under-covered.
         should_expand_coverage = (
-            mode == QueryMode.BALANCED
-            and (
-                routing.enable_coverage_expansion
-                or coverage_plan.requires_multi_leaf
-                or coverage_plan.has_required_facets
-                or coverage_plan.communication_min_hits > 0
-                or target_person_strategy_resolver
-                or ambiguity_cue >= feature_active_min
-                or (coverage_plan.enforce_entity_thread and bool(query_entities))
+            (
+                mode == QueryMode.BALANCED
+                and (
+                    routing.enable_coverage_expansion
+                    or coverage_plan.requires_multi_leaf
+                    or coverage_plan.has_required_facets
+                    or coverage_plan.communication_min_hits > 0
+                    or target_person_strategy_resolver
+                    or ambiguity_cue >= feature_active_min
+                    or (coverage_plan.enforce_entity_thread and bool(query_entities))
+                )
             )
+            or (mode == QueryMode.DRILL_DOWN and coverage_plan.requires_multi_leaf)
         )
         if should_expand_coverage:
             used_ids = {item.node.node_id for item in picked}
@@ -1043,6 +1046,7 @@ class HierarchicalRetriever:
                 )
                 target_leaf_count = self._dynamic_target_leaf_count(
                     leaf_count=leaf_count,
+                    min_leaf_count=coverage_plan.min_leaf_count,
                     covered=covered,
                     required_facets=required_facets,
                     communication_facets=communication_facets,
@@ -1443,6 +1447,7 @@ class HierarchicalRetriever:
         self,
         *,
         leaf_count: int,
+        min_leaf_count: int,
         covered: set[str],
         required_facets: set[str],
         communication_facets: set[str],
@@ -1458,6 +1463,7 @@ class HierarchicalRetriever:
     ) -> int:
         return dynamic_target_leaf_count(
             leaf_count=leaf_count,
+            min_leaf_count=min_leaf_count,
             covered=covered,
             required_facets=required_facets,
             communication_facets=communication_facets,

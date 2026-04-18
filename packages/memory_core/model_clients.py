@@ -5,6 +5,7 @@ Wraps mock and openai compatible json generation"""
 
 import json
 import random
+import re
 import time
 from abc import ABC, abstractmethod
 from typing import Any
@@ -12,6 +13,169 @@ from typing import Any
 import httpx
 
 from packages.memory_core.utils import extract_entities, unique_topics
+
+
+TEMPORAL_TOPIC_TOKENS = {
+    "after",
+    "around",
+    "before",
+    "day",
+    "days",
+    "earlier",
+    "evening",
+    "hour",
+    "hours",
+    "later",
+    "latest",
+    "minute",
+    "minutes",
+    "mon",
+    "monday",
+    "month",
+    "months",
+    "morning",
+    "night",
+    "pm",
+    "am",
+    "recent",
+    "recently",
+    "same",
+    "today",
+    "tomorrow",
+    "tonight",
+    "week",
+    "weeks",
+    "yesterday",
+    "jan",
+    "january",
+    "feb",
+    "february",
+    "mar",
+    "march",
+    "apr",
+    "april",
+    "may",
+    "jun",
+    "june",
+    "jul",
+    "july",
+    "aug",
+    "august",
+    "sep",
+    "sept",
+    "september",
+    "oct",
+    "october",
+    "nov",
+    "november",
+    "dec",
+    "december",
+}
+
+EXACT_TEMPORAL_PATTERNS = (
+    re.compile(r"\b\d{4}-\d{2}-\d{2}(?:[ T]\d{1,2}:\d{2})?\b"),
+    re.compile(r"\b\d{1,2}/\d{1,2}/\d{4}(?:,?\s+\d{1,2}:\d{2}(?:\s*[AaPp][Mm])?)?\b"),
+    re.compile(r"\b\d{1,2}:\d{2}\s*[AaPp][Mm]\b"),
+)
+
+
+def _verification_subject_payload(user_payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    if "summary" in user_payload:
+        return "summary", dict(user_payload["summary"])
+    if "answer" in user_payload:
+        return "answer", dict(user_payload["answer"])
+    return "answer", {}
+
+
+def _is_temporal_topic_token(token: str) -> bool:
+    lowered = token.lower()
+    if lowered in TEMPORAL_TOPIC_TOKENS:
+        return True
+    if lowered.isdigit():
+        return True
+    return bool(re.fullmatch(r"\d{1,2}(am|pm)", lowered))
+
+
+def _extract_exact_temporal_phrases(text: str) -> list[str]:
+    matches: list[str] = []
+    for pattern in EXACT_TEMPORAL_PATTERNS:
+        for match in pattern.finditer(text):
+            phrase = match.group(0).strip()
+            if phrase not in matches:
+                matches.append(phrase)
+    return matches
+
+
+def _find_temporal_unsupported_claims(summary_text: str, support_entries: list[dict[str, Any]]) -> list[str]:
+    support_texts = [str(item.get("text", "")) for item in support_entries]
+    explicit_support_temporal_phrases = {
+        phrase.lower()
+        for text in support_texts
+        for phrase in _extract_exact_temporal_phrases(text)
+    }
+    unsupported: list[str] = []
+    for phrase in _extract_exact_temporal_phrases(summary_text):
+        if phrase.lower() not in explicit_support_temporal_phrases:
+            unsupported.append(
+                f"The summary includes an exact timestamp '{phrase}' that is not explicit in the supporting memory text."
+            )
+    return unsupported
+
+
+def _mock_answer_from_context(query: str, retrieved_nodes: list[dict[str, Any]], packed_context: str) -> dict[str, Any]:
+    query_lower = query.lower()
+    unique_nodes: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for item in retrieved_nodes:
+        node_id = str(item.get("node_id", ""))
+        if not node_id or node_id in seen_ids:
+            continue
+        seen_ids.add(node_id)
+        unique_nodes.append(item)
+
+    if not unique_nodes:
+        return {
+            "text": "I don't have enough retrieved evidence to answer that yet.",
+            "citations": [],
+            "confidence": 0.0,
+        }
+
+    query_entities = [entity for entity in extract_entities(query) if entity]
+    if any(token in query_lower for token in [" vs ", "versus", "differently from", "compare"]) and len(query_entities) >= 2:
+        comparison_parts: list[str] = []
+        comparison_citations: list[str] = []
+        for entity in query_entities[:3]:
+            match = next(
+                (
+                    node
+                    for node in unique_nodes
+                    if entity.lower() in node.get("text", "").lower()
+                    or entity.lower() in {item.lower() for item in node.get("entities", [])}
+                ),
+                None,
+            )
+            if match is None:
+                continue
+            comparison_parts.append(f"{entity}: {match.get('text', '').strip().rstrip('.')}.")
+            comparison_citations.append(str(match.get("node_id", "")))
+        if len(comparison_parts) >= 2:
+            return {
+                "text": " ".join(comparison_parts),
+                "citations": [citation for citation in comparison_citations if citation],
+                "confidence": 0.68,
+            }
+
+    snippets = [node.get("text", "").strip().rstrip(".") for node in unique_nodes[:2] if node.get("text")]
+    if not snippets and packed_context.strip():
+        snippets = [line.strip() for line in packed_context.splitlines()[2:4] if line.strip()]
+    answer_text = "Based on the retrieved context: " + ". ".join(snippets)
+    if not snippets:
+        answer_text = "I don't have enough retrieved evidence to answer that yet."
+    return {
+        "text": answer_text.strip(),
+        "citations": [str(node.get("node_id", "")) for node in unique_nodes[:2] if node.get("node_id")],
+        "confidence": 0.62 if snippets else 0.0,
+    }
 
 
 class ModelClient(ABC):
@@ -57,23 +221,38 @@ class MockModelClient(ModelClient):
                 "confidence": 0.72,
                 "citations": [item["node_id"] for item in child_nodes],
             }
-        summary_text = user_payload["summary"]["text"]
-        support_text = " ".join(item["text"] for item in user_payload["supports"])
+        if component == "answerer":
+            return _mock_answer_from_context(
+                str(user_payload.get("query", "")),
+                list(user_payload.get("retrieved_nodes", [])),
+                str(user_payload.get("packed_context", "")),
+            )
+        subject_label, subject_payload = _verification_subject_payload(user_payload)
+        summary_text = str(subject_payload.get("text", ""))
+        support_entries = user_payload["supports"]
+        support_text = " ".join(item["text"] for item in support_entries)
         unsupported_claims: list[str] = []
         contradictions: list[str] = []
+        temporal_unsupported_claims = _find_temporal_unsupported_claims(summary_text, support_entries)
         for token in unique_topics(summary_text, limit=15):
+            if _is_temporal_topic_token(token):
+                continue
             if token not in set(unique_topics(support_text, limit=40)):
                 unsupported_claims.append(token)
+        unsupported_claims.extend(temporal_unsupported_claims)
         if " not " in f" {summary_text.lower()} " and " not " not in f" {support_text.lower()} ":
             contradictions.append("negation mismatch")
         quality_status = "verified"
         if contradictions:
             quality_status = "contradicted"
-        elif len(unsupported_claims) > 4:
+        elif temporal_unsupported_claims or len(unsupported_claims) > 4:
             quality_status = "unsupported"
         return {
             "quality_status": quality_status,
-            "unsupported_claims": unsupported_claims,
+            "unsupported_claims": [
+                claim if claim.startswith("The ") else f"The {subject_label} includes unsupported content: {claim}"
+                for claim in unsupported_claims
+            ],
             "contradictions": contradictions,
             "omissions": [],
             "scores": {
@@ -207,6 +386,21 @@ class OpenAICompatibleClient(ModelClient):
                         "citations": {"type": "array", "items": {"type": "string"}},
                     },
                     "required": ["text", "entities", "topics", "confidence", "citations"],
+                },
+            }
+        if component == "answerer":
+            return {
+                "name": "answer_result",
+                "description": "Grounded answer generated only from retrieved memory context.",
+                "schema": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "text": {"type": "string"},
+                        "citations": {"type": "array", "items": {"type": "string"}},
+                        "confidence": {"type": "number"},
+                    },
+                    "required": ["text", "citations", "confidence"],
                 },
             }
         return {

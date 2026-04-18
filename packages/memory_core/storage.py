@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Iterator
 
-from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Text, create_engine, select
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Text, create_engine, select, text
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from packages.memory_core.utils import (
@@ -150,6 +150,10 @@ class Database:
 
     def create_all(self) -> None:
         Base.metadata.create_all(self.engine)
+
+    def verify_connection(self) -> None:
+        with self.engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
 
     @contextmanager
     def session(self) -> Iterator[Session]:

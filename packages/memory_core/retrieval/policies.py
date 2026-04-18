@@ -211,6 +211,25 @@ class QueryFeatureScorer:
         """Tokenize normalized query text"""
         return set(re.findall(r"[a-z0-9]+", self._normalize_text(query)))
 
+    def _query_named_entities(self, query: str) -> set[str]:
+        entities = {token.lower() for token in re.findall(r"\b[A-Z][a-zA-Z]+\b", query)}
+        entities.update(match.lower() for match in re.findall(r"\b([A-Z][a-z]+)'s\b", query))
+        stop_entities = {"how", "what", "when", "where", "who", "why", "which", "before", "after"}
+        return {entity for entity in entities if len(entity) > 2 and entity not in stop_entities}
+
+    def _is_multi_entity_comparison_query(self, query: str) -> bool:
+        lowered = query.lower()
+        entities = self._query_named_entities(query)
+        comparison_markers = (
+            " vs ",
+            " versus ",
+            "differently from",
+            "compare",
+            "compared to",
+            "relative to",
+        )
+        return len(entities) >= 2 and any(marker in lowered for marker in comparison_markers)
+
     def _edit_distance_le_one(self, source: str, target: str) -> bool:
         if source == target:
             return True
@@ -329,6 +348,7 @@ class QueryFeatureScorer:
         negation = feature_scores["negation_cue"]
         ambiguity = feature_scores["entity_ambiguity_cue"]
         coverage = max(composition, negation)
+        comparison_query = self._is_multi_entity_comparison_query(query)
 
         flat_top1_max = self.thresholds["flat_top1_max"]
         revision_leaf_min = self.thresholds["revision_leaf_min"]
@@ -338,7 +358,7 @@ class QueryFeatureScorer:
         correction_focus = bool(terms & {"actually", "now", "current", "correct", "updated", "changed", "revision"})
 
         # keep flat route only when cues are absent
-        if hierarchical_score <= flat_top1_max and not fired_rules:
+        if hierarchical_score <= flat_top1_max and not fired_rules and not comparison_query:
             return QueryRoutingDecision(
                 strategy="flat_top1",
                 reason=f"Hierarchical score {hierarchical_score:.2f} is below flat threshold {flat_top1_max:.2f}.",
@@ -348,6 +368,18 @@ class QueryFeatureScorer:
                 branch_limit_override=1,
                 enable_coverage_expansion=False,
                 enable_revision_enrichment=False,
+            )
+
+        if comparison_query:
+            return QueryRoutingDecision(
+                strategy="hierarchy_expand",
+                reason="Comparison query names multiple entities, so multi-entity hierarchical coverage is required.",
+                feature_scores=feature_scores,
+                fired_rules=fired_rules + ["comparison:multi_entity"],
+                hierarchical_score=max(hierarchical_score, hierarchy_expand_min),
+                branch_limit_override=max(2, branch_limit),
+                enable_coverage_expansion=True,
+                enable_revision_enrichment=temporal >= revision_leaf_min,
             )
 
         if temporal >= revision_leaf_min and coverage < coverage_min and conflict < hierarchy_expand_min:
@@ -411,6 +443,8 @@ def build_coverage_plan(
     conflict_cue = feature_scores.get("conflict_cue", 0.0)
     temporal_cue = feature_scores.get("temporal_cue", 0.0)
     ambiguity_cue = feature_scores.get("entity_ambiguity_cue", 0.0)
+    comparison_markers = (" vs ", " versus ", "differently from", "compare", "compared to", "relative to")
+    comparison_query = len(query_entities) >= 2 and any(marker in lowered for marker in comparison_markers)
 
     required_facets: set[str] = set()
     communication_facets = ("facet:preference", "facet:avoid", "facet:strategy")
@@ -440,14 +474,17 @@ def build_coverage_plan(
     if temporal_cue >= feature_active_min and terms & {"when", "latest", "current", "now"}:
         required_facets.add("facet:temporal")
 
+    if comparison_query:
+        required_facets.update({f"entity:{entity}" for entity in query_entities})
     communication_min_hits = 2 if communication_intent else 0
-    min_leaf_count = 1
+    min_leaf_count = max(2, len(query_entities)) if comparison_query else 1
 
     enforce_entity_thread = bool(query_entities) and (
         max(composition_cue, negation_cue) >= coverage_min
         or ambiguity_cue >= feature_active_min
         or composition_cue >= feature_active_min
         or conflict_cue >= feature_active_min
+        or comparison_query
     )
     return CoveragePlan(
         min_leaf_count=min_leaf_count,
@@ -460,6 +497,7 @@ def build_coverage_plan(
 def dynamic_target_leaf_count(
     *,
     leaf_count: int,
+    min_leaf_count: int,
     covered: set[str],
     required_facets: set[str],
     communication_facets: set[str],
@@ -476,8 +514,8 @@ def dynamic_target_leaf_count(
     """Compute adaptive supplemental target leaf count
     Expands only when missing facets confidence issues or disambiguation pressure remain"""
     if leaf_count <= 0:
-        return 1
-    target = max(2, int(expansion_target))
+        return max(1, min_leaf_count)
+    target = max(2, int(expansion_target), min_leaf_count)
     missing_required = required_facets - covered
     communication_hits = len(communication_facets & covered)
     if missing_required:

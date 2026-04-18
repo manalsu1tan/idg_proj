@@ -4,9 +4,10 @@ from __future__ import annotations
 Covers behavior and regression checks"""
 
 import json
+from datetime import datetime
 
 from packages.memory_core.model_components import build_model_client
-from packages.memory_core.model_clients import OpenAICompatibleClient
+from packages.memory_core.model_clients import MockModelClient, OpenAICompatibleClient
 from packages.memory_core.settings import Settings
 from packages.schemas.models import ModelProvider
 
@@ -72,3 +73,65 @@ def test_missing_api_key_falls_back_to_mock_provider() -> None:
     )
     assert provider == ModelProvider.MOCK
     assert client.__class__.__name__ == "MockModelClient"
+
+
+def test_mock_verifier_treats_coarse_temporal_language_as_supported() -> None:
+    client = MockModelClient()
+    response = client.generate_json(
+        component="verifier",
+        model_name="mock",
+        system_prompt="verify",
+        user_payload={
+            "summary": {
+                "node_id": "s1",
+                "text": "Met Maria recently about the Friday demo.",
+                "timestamp_start": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                "timestamp_end": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                "entities": ["Maria"],
+                "topics": ["demo"],
+            },
+            "supports": [
+                {
+                    "node_id": "l1",
+                    "text": "Met Maria about the Friday demo.",
+                    "timestamp_start": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                    "timestamp_end": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                    "entities": ["Maria"],
+                    "topics": ["demo"],
+                }
+            ],
+        },
+    )
+    assert response["quality_status"] == "verified"
+    assert all("timestamp" not in claim.lower() for claim in response["unsupported_claims"])
+
+
+def test_mock_verifier_requires_explicit_support_text_for_exact_timestamp_claim() -> None:
+    client = MockModelClient()
+    response = client.generate_json(
+        component="verifier",
+        model_name="mock",
+        system_prompt="verify",
+        user_payload={
+            "summary": {
+                "node_id": "s1",
+                "text": "Met Maria at 2025-01-05 09:00 about the Friday demo.",
+                "timestamp_start": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                "timestamp_end": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                "entities": ["Maria"],
+                "topics": ["demo"],
+            },
+            "supports": [
+                {
+                    "node_id": "l1",
+                    "text": "Met Maria about the Friday demo.",
+                    "timestamp_start": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                    "timestamp_end": datetime(2025, 1, 5, 9, 0, 0).isoformat(),
+                    "entities": ["Maria"],
+                    "topics": ["demo"],
+                }
+            ],
+        },
+    )
+    assert response["quality_status"] == "unsupported"
+    assert any("exact timestamp" in claim.lower() for claim in response["unsupported_claims"])

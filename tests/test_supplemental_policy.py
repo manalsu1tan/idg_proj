@@ -160,6 +160,7 @@ def test_supplemental_utility_threshold_table(params: dict[str, object], expecte
         (
             {
                 "leaf_count": 0,
+                "min_leaf_count": 1,
                 "covered": set(),
                 "required_facets": {"facet:commitment"},
                 "communication_facets": set(),
@@ -179,6 +180,7 @@ def test_supplemental_utility_threshold_table(params: dict[str, object], expecte
         (
             {
                 "leaf_count": 1,
+                "min_leaf_count": 1,
                 "covered": set(),
                 "required_facets": {"facet:commitment"},
                 "communication_facets": set(),
@@ -202,6 +204,7 @@ def test_supplemental_utility_threshold_table(params: dict[str, object], expecte
                 "required_facets": set(),
                 "communication_facets": {"facet:communication"},
                 "communication_min_hits": 1,
+                "min_leaf_count": 1,
                 "low_confidence": False,
                 "routing_expansion": False,
                 "enforce_entity_thread": False,
@@ -217,6 +220,7 @@ def test_supplemental_utility_threshold_table(params: dict[str, object], expecte
         (
             {
                 "leaf_count": 2,
+                "min_leaf_count": 1,
                 "covered": {"facet:communication"},
                 "required_facets": set(),
                 "communication_facets": {"facet:communication"},
@@ -236,6 +240,7 @@ def test_supplemental_utility_threshold_table(params: dict[str, object], expecte
         (
             {
                 "leaf_count": 1,
+                "min_leaf_count": 1,
                 "covered": {"facet:communication"},
                 "required_facets": set(),
                 "communication_facets": {"facet:communication"},
@@ -255,6 +260,7 @@ def test_supplemental_utility_threshold_table(params: dict[str, object], expecte
         (
             {
                 "leaf_count": 1,
+                "min_leaf_count": 1,
                 "covered": {"facet:communication"},
                 "required_facets": set(),
                 "communication_facets": {"facet:communication"},
