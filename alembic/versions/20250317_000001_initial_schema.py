@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Initial storage schema
+Creates the base memory graph and trace tables"""
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -16,6 +19,7 @@ depends_on = None
 
 
 def upgrade() -> None:
+    """Create the initial schema"""
     bind = op.get_bind()
     if bind.dialect.name == "postgresql":
         op.execute("CREATE EXTENSION IF NOT EXISTS vector")
@@ -115,6 +119,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """Drop the initial schema"""
     op.drop_index("ix_model_traces_created_at", table_name="model_traces")
     op.drop_index("ix_model_traces_provider", table_name="model_traces")
     op.drop_index("ix_model_traces_component", table_name="model_traces")

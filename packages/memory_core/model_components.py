@@ -45,6 +45,14 @@ def build_model_client(settings: Settings) -> tuple[ModelClient, ModelProvider]:
     return MockModelClient(), ModelProvider.MOCK
 
 
+def anchor_node_id(nodes: list[MemoryNode], preferred_ids: list[str] | None = None) -> str | None:
+    available_ids = {node.node_id for node in nodes}
+    for node_id in preferred_ids or []:
+        if node_id in available_ids:
+            return node_id
+    return nodes[0].node_id if nodes else None
+
+
 class ModelBackedSummarizer:
     """Model backed summarizer component
     Formats child node payload applies token caps and records model trace metadata"""
@@ -191,7 +199,7 @@ class ModelBackedAnswerer:
         )
         trace = ModelTrace(
             trace_id=str(uuid.uuid4()),
-            node_id=None,
+            node_id=anchor_node_id(retrieved_nodes, result.citations),
             agent_id=agent_id,
             component="answerer",
             provider=self.provider,
@@ -321,7 +329,7 @@ class ModelBackedAnswerVerifier:
         )
         trace = ModelTrace(
             trace_id=str(uuid.uuid4()),
-            node_id=None,
+            node_id=anchor_node_id(supports, answer.citations),
             agent_id=agent_id,
             component="answer_verifier",
             provider=self.provider,

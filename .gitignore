@@ -5,6 +5,7 @@ __pycache__/
 .coverage
 dist/
 build/
+reports/
 *.egg-info/
 *.db
 *.sqlite3

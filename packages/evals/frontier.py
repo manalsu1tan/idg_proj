@@ -153,6 +153,7 @@ STABILITY_FEATURE_KEYS: tuple[str, ...] = (
 
 
 def _log(message: str, *, enabled: bool = True) -> None:
+    """Print a timestamped progress line"""
     if not enabled:
         return
     timestamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -160,6 +161,7 @@ def _log(message: str, *, enabled: bool = True) -> None:
 
 
 def _set_nested_value(payload: dict[str, Any], dotted_key: str, value: float | int) -> None:
+    """Set a nested policy value from a dotted key"""
     keys = dotted_key.split(".")
     current = payload
     for key in keys[:-1]:
@@ -172,6 +174,7 @@ def _set_nested_value(payload: dict[str, Any], dotted_key: str, value: float | i
 
 
 def _apply_overrides(base_policy: dict[str, Any], overrides: dict[str, float]) -> dict[str, Any]:
+    """Apply candidate overrides to a base policy"""
     policy = deepcopy(base_policy)
     for dotted_key, value in overrides.items():
         _set_nested_value(policy, dotted_key, value)
@@ -179,6 +182,7 @@ def _apply_overrides(base_policy: dict[str, Any], overrides: dict[str, float]) -
 
 
 def _dimension_from_spec(key: str, spec: Any) -> SweepDimension:
+    """Normalize one sweep-space dimension"""
     if isinstance(spec, dict):
         if "min" not in spec or "max" not in spec:
             raise ValueError(f"Sweep-space entry for {key!r} must contain min/max.")
@@ -200,6 +204,7 @@ def _dimension_from_spec(key: str, spec: Any) -> SweepDimension:
 
 
 def _load_sweep_space(path: Path | None) -> list[SweepDimension]:
+    """Load and sort the sweep-space definition"""
     if path is None:
         payload: dict[str, Any] = DEFAULT_SWEEP_SPACE
     else:
@@ -258,7 +263,7 @@ def _sample_overrides(
     else:
         raise ValueError(f"Unsupported sample method: {sample_method}")
 
-    # De-duplicate in case quantization collapses points.
+    # De-duplicate in case quantization collapses points
     unique: list[dict[str, float]] = []
     seen: set[tuple[tuple[str, float], ...]] = set()
     for item in sampled:
@@ -558,7 +563,7 @@ def _weighted_seed_objective_stats(
             "ci95_high": mean_value + ci_half_width,
         }
 
-    # global.flat_win_penalty derives from flat win rate with negated sign.
+    # global.flat_win_penalty derives from flat win rate with negated sign
     flat_stats = objective_stats.get("global.hierarchy_win_rate")
     flat_win_stats = None
     if slices:

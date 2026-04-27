@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Vector and graph indexes
+Adds traversal and embedding indexes"""
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -11,14 +14,17 @@ depends_on = None
 
 
 def _index_names(bind, table_name: str) -> set[str]:
+    """List index names for a table"""
     return {index["name"] for index in sa.inspect(bind).get_indexes(table_name)}
 
 
 def _foreign_key_names(bind, table_name: str) -> set[str]:
+    """List foreign key names for a table"""
     return {fk["name"] for fk in sa.inspect(bind).get_foreign_keys(table_name) if fk.get("name")}
 
 
 def upgrade() -> None:
+    """Create graph and vector indexes"""
     bind = op.get_bind()
     index_names = _index_names(bind, "memory_edges")
 
@@ -70,6 +76,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    """Drop graph and vector indexes"""
     bind = op.get_bind()
 
     if bind.dialect.name == "postgresql":

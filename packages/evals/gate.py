@@ -175,7 +175,7 @@ def run_generalization_gate(
         canonical = canonical_by_family.get(family)
         if canonical is None:
             continue
-        # Trigger only when canonical has meaningful gains.
+        # Trigger only when canonical has meaningful gains
         if canonical["avg_keyword_gain"] <= 0.05 and canonical["avg_slot_gain"] <= 0.05:
             continue
         kw_gain_floor = canonical["avg_keyword_gain"] * 0.6

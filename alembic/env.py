@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+"""Alembic environment wiring
+Loads metadata and database settings for migrations"""
+
 import os
 from logging.config import fileConfig
 
@@ -20,6 +23,7 @@ if database_url:
 
 
 def run_migrations_offline() -> None:
+    """Run migrations without a live engine"""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(url=url, target_metadata=target_metadata, literal_binds=True, compare_type=True)
     with context.begin_transaction():
@@ -27,6 +31,7 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
+    """Run migrations against a live connection"""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix="sqlalchemy.",

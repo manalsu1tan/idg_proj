@@ -37,14 +37,17 @@ def _latest_runs_by_scenario(raw_runs: list[dict[str, Any]]) -> list[EvalRunResu
 
 
 def _mean(values: list[float]) -> float:
+    """Return a safe mean"""
     return statistics.fmean(values) if values else 0.0
 
 
 def _stddev(values: list[float]) -> float:
+    """Return a safe population stddev"""
     return statistics.pstdev(values) if len(values) > 1 else 0.0
 
 
 def _winner(baseline: dict[str, float], hierarchy: dict[str, float]) -> str:
+    """Pick the winning retriever for one scenario"""
     baseline_slot = baseline.get("slot_recall", 0.0)
     hierarchy_slot = hierarchy.get("slot_recall", 0.0)
     if hierarchy_slot > baseline_slot:
@@ -118,6 +121,7 @@ def build_report_payload(raw_runs: list[dict[str, Any]]) -> dict[str, Any]:
     scenario_rows: list[dict[str, Any]] = []
 
     for run in runs:
+        # Normalize both metric sets before computing deltas
         baseline = _metric_map([dump_model_json(metric) for metric in run.baseline_metrics])
         hierarchy = _metric_map([dump_model_json(metric) for metric in run.hierarchy_metrics])
         winner = _winner(baseline, hierarchy)
@@ -148,6 +152,7 @@ def build_report_payload(raw_runs: list[dict[str, Any]]) -> dict[str, Any]:
 
     family_rows = []
     for family_name in sorted(family_groups):
+        # Reuse the same aggregation path for families and globals
         family_rows.append(
             {
                 "family_name": family_name,
@@ -249,7 +254,7 @@ def export_report(service: MemoryService, output_dir: Path = REPORTS_DIR, stem: 
 
 
 def main() -> None:
-    """CLI entrypoint for report export"""
+    """Run the report export cli"""
     parser = argparse.ArgumentParser(description="Export a benchmark report from stored eval runs.")
     parser.add_argument("--output-dir", default=str(REPORTS_DIR), help="Directory to write report artifacts into.")
     parser.add_argument("--stem", default=None, help="Optional file stem for the generated report files.")

@@ -1007,7 +1007,7 @@ class HierarchicalRetriever:
                 )
             )
 
-        # For coverage-heavy prompts, add missing coverage leaves if the first pass under-covered.
+        # For coverage-heavy prompts add missing coverage leaves if the first pass under-covered
         should_expand_coverage = (
             (
                 mode == QueryMode.BALANCED
@@ -1144,7 +1144,7 @@ class HierarchicalRetriever:
                         utility_bonus += supplemental_weights.get("disambiguation_bonus", 0.10)
                     if is_entity_aligned:
                         utility_bonus += supplemental_weights.get("entity_aligned_bonus", 0.03)
-                    # Tightening: require non-trivial marginal utility before adding leaf #2+.
+                    # Tightening requires non-trivial marginal utility before adding leaf #2+
                     if leaf_count > 0 and utility_bonus < utility_threshold:
                         continue
                     utility += utility_bonus
