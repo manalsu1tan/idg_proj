@@ -12,6 +12,8 @@ The system keeps the familiar agent loop of `observe -> retrieve -> plan/react/r
 
 ## Project Overview
 
+The final report is [idg_proj/m_report_final.pdf](/Users/Manal/Documents/GitHub/idg_proj/m_report_final.pdf)
+
 The repository combines an agent memory service, an inspection UI, and an evaluation harness.
 
 - Memory ingestion writes raw episodes into a structured store with timestamps, entities, topics, and provenance.
