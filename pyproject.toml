@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "project-b-memory-tree"
 version = "0.1.0"
-description = "Research-first hierarchical memory architecture for generative agents."
+description = "Hierarchical memory architecture for generative agents."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
