@@ -12,7 +12,7 @@ The system keeps the familiar agent loop of `observe -> retrieve -> plan/react/r
 
 ## Project Overview
 
-The final report is [idg_proj/m_report_final.pdf](/Users/Manal/Documents/GitHub/idg_proj/m_report_final.pdf)
+The final report is [idg_proj/m_report_final.pdf](/idg_proj/m_report_final.pdf)
 
 The repository combines an agent memory service, an inspection UI, and an evaluation harness.
 
@@ -30,36 +30,35 @@ The repository is organized into three main layers: API and UI entrypoints, core
 
 ### Main application entrypoints
 
-- [apps/api/main.py](/Users/Manal/Documents/GitHub/idg_proj/apps/api/main.py): FastAPI app exposing ingest, retrieve, summarize, refresh, provenance, timeline, trace, eval, ablation, and counterfactual endpoints.
-- [apps/ui/static/index.html](/Users/Manal/Documents/GitHub/idg_proj/apps/ui/static/index.html): read-only inspection UI served at `/ui`.
-- [apps/worker/worker.py](/Users/Manal/Documents/GitHub/idg_proj/apps/worker/worker.py): worker hooks for summarization, refresh, and verification flows.
+- [apps/api/main.py](idg_proj/apps/api/main.py): FastAPI app exposing ingest, retrieve, summarize, refresh, provenance, timeline, trace, eval, ablation, and counterfactual endpoints.
+- [apps/ui/static/index.html](idg_proj/apps/ui/static/index.html): read-only inspection UI served at `/ui`.
+- [apps/worker/worker.py](idg_proj/apps/worker/worker.py): worker hooks for summarization, refresh, and verification flows.
 
 ### Core memory system
 
-- [packages/memory_core/services.py](/Users/Manal/Documents/GitHub/idg_proj/packages/memory_core/services.py): orchestration layer for ingest, tree building, flat retrieval, hierarchical retrieval, refresh, and inspection views.
-- [packages/memory_core/model_components.py](/Users/Manal/Documents/GitHub/idg_proj/packages/memory_core/model_components.py): model backed summarizer, verifier, answerer, and answer verifier components.
-- [packages/memory_core/social_state.py](/Users/Manal/Documents/GitHub/idg_proj/packages/memory_core/social_state.py): social state digest derivation over stored memory.
-- [packages/memory_core/storage.py](/Users/Manal/Documents/GitHub/idg_proj/packages/memory_core/storage.py): persistence layer for nodes, traces, eval runs, and supporting state.
-- [packages/memory_core/settings.py](/Users/Manal/Documents/GitHub/idg_proj/packages/memory_core/settings.py): runtime configuration and `.env` loading.
+- [packages/memory_core/services.py](idg_proj/packages/memory_core/services.py): orchestration layer for ingest, tree building, flat retrieval, hierarchical retrieval, refresh, and inspection views.
+- [packages/memory_core/model_components.py](idg_proj/packages/memory_core/model_components.py): model backed summarizer, verifier, answerer, and answer verifier components.
+- [packages/memory_core/social_state.py](idg_proj/packages/memory_core/social_state.py): social state digest derivation over stored memory.
+- [packages/memory_core/storage.py](idg_proj/packages/memory_core/storage.py): persistence layer for nodes, traces, eval runs, and supporting state.
+- [packages/memory_core/settings.py](idg_proj/packages/memory_core/settings.py): runtime configuration and `.env` loading.
 
 ### Evaluation and reporting
 
-- [packages/evals/runner.py](/Users/Manal/Documents/GitHub/idg_proj/packages/evals/runner.py): deterministic benchmark runner.
-- [packages/evals/ablation.py](/Users/Manal/Documents/GitHub/idg_proj/packages/evals/ablation.py): retrieval regime ablations and report generation.
-- [packages/evals/counterfactual.py](/Users/Manal/Documents/GitHub/idg_proj/packages/evals/counterfactual.py): counterfactual replay evaluation.
-- [packages/evals/report.py](/Users/Manal/Documents/GitHub/idg_proj/packages/evals/report.py): benchmark report payloads and Markdown rendering.
-- [reports/](/Users/Manal/Documents/GitHub/idg_proj/reports): generated evaluation, ablation, and frontier artifacts.
+- [packages/evals/runner.py](idg_proj/packages/evals/runner.py): deterministic benchmark runner.
+- [packages/evals/ablation.py](idg_proj/packages/evals/ablation.py): retrieval regime ablations and report generation.
+- [packages/evals/counterfactual.py](idg_proj/packages/evals/counterfactual.py): counterfactual replay evaluation.
+- [packages/evals/report.py](idg_proj/packages/evals/report.py): benchmark report payloads and Markdown rendering.
 
 ### Infrastructure and scripts
 
-- [infra/docker-compose.yml](/Users/Manal/Documents/GitHub/idg_proj/infra/docker-compose.yml): local Postgres, pgvector, and Redis stack.
-- [scripts/bootstrap_uv.sh](/Users/Manal/Documents/GitHub/idg_proj/scripts/bootstrap_uv.sh): environment bootstrap for local development.
-- [scripts/validate_postgres_stack.sh](/Users/Manal/Documents/GitHub/idg_proj/scripts/validate_postgres_stack.sh): end to end Postgres migration validation.
-- [scripts/seed_benchmark_agents.sh](/Users/Manal/Documents/GitHub/idg_proj/scripts/seed_benchmark_agents.sh): seed demo and benchmark agents for the inspector UI.
-- [scripts/export_benchmark_report.sh](/Users/Manal/Documents/GitHub/idg_proj/scripts/export_benchmark_report.sh): export benchmark reports from stored eval runs.
-- [scripts/export_ablation_report.sh](/Users/Manal/Documents/GitHub/idg_proj/scripts/export_ablation_report.sh): run ablations and export reports.
-- [scripts/run_frontier_sweep.sh](/Users/Manal/Documents/GitHub/idg_proj/scripts/run_frontier_sweep.sh): run larger retrieval policy sweeps and export frontier artifacts.
-- [scripts/plot_frontier_results.py](/Users/Manal/Documents/GitHub/idg_proj/scripts/plot_frontier_results.py): plotting utility for frontier outputs.
+- [infra/docker-compose.yml](idg_proj/infra/docker-compose.yml): local Postgres, pgvector, and Redis stack.
+- [scripts/bootstrap_uv.sh](idg_proj/scripts/bootstrap_uv.sh): environment bootstrap for local development.
+- [scripts/validate_postgres_stack.sh](idg_proj/scripts/validate_postgres_stack.sh): end to end Postgres migration validation.
+- [scripts/seed_benchmark_agents.sh](idg_proj/scripts/seed_benchmark_agents.sh): seed demo and benchmark agents for the inspector UI.
+- [scripts/export_benchmark_report.sh](idg_proj/scripts/export_benchmark_report.sh): export benchmark reports from stored eval runs.
+- [scripts/export_ablation_report.sh](idg_proj/scripts/export_ablation_report.sh): run ablations and export reports.
+- [scripts/run_frontier_sweep.sh](idg_proj/scripts/run_frontier_sweep.sh): run larger retrieval policy sweeps and export frontier artifacts.
+- [scripts/plot_frontier_results.py](idg_proj/scripts/plot_frontier_results.py): plotting utility for frontier outputs.
 
 ## How To Run
 
@@ -81,7 +80,7 @@ Once the server is running:
 - API docs are available at `http://127.0.0.1:8000/docs`
 - the inspector UI is available at `http://127.0.0.1:8000/ui`
 
-Local `.env` files are auto loaded from the repository root by [packages/memory_core/settings.py](/Users/Manal/Documents/GitHub/idg_proj/packages/memory_core/settings.py). Explicit shell environment variables still take precedence.
+Local `.env` files are auto loaded from the repository root by [packages/memory_core/settings.py](idg_proj/packages/memory_core/settings.py). Explicit shell environment variables still take precedence.
 
 ### Run with Postgres, pgvector, and Redis
 
@@ -163,7 +162,7 @@ This seeds:
 ./scripts/export_benchmark_report.sh
 ```
 
-This writes JSON and Markdown artifacts under [reports/](/Users/Manal/Documents/GitHub/idg_proj/reports).
+This writes JSON and Markdown artifacts under [reports/](idg_proj/reports).
 
 ### Run retrieval ablations
 
@@ -184,14 +183,14 @@ The frontier sweep optimizes over multi-slice objectives by default:
 - hard query perturbations such as `concise`, `indirect`, `colloquial`, `typo_noise`, `word_order`, and `entity_swap_distractor`
 - family-level objectives such as `multi_person_interference` slot gain and `time_window_pressure` token delta
 
-Generated frontier outputs are written under [reports/](/Users/Manal/Documents/GitHub/idg_proj/reports).
+Generated frontier outputs are written under [reports/](idg_proj/reports).
 
 ## Database Notes
 
 - Local fallback: `sqlite+pysqlite:///./project_b.db`
 - Production oriented local stack: `postgresql+psycopg://project_b:project_b@localhost:5432/project_b`
-- Migration entrypoint: [alembic.ini](/Users/Manal/Documents/GitHub/idg_proj/alembic.ini)
-- Migrations live under [alembic/versions](/Users/Manal/Documents/GitHub/idg_proj/alembic/versions)
+- Migration entrypoint: [alembic.ini](idg_proj/alembic.ini)
+- Migrations live under [alembic/versions](idg_proj/alembic/versions)
 
 The app can auto create schema for lightweight local workflows, but production oriented runs should use:
 
