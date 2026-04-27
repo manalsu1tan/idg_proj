@@ -6,7 +6,7 @@ Pydantic types for nodes traces api and eval payloads"""
 import json
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -73,6 +73,12 @@ class StructuredSummary(BaseModel):
     self_model_updates: list[str] = Field(default_factory=list)
 
 
+class MemorySourceMetadata(BaseModel):
+    source_type: str | None = None
+    source_id: str | None = None
+    event_id: str | None = None
+
+
 class MemoryNode(BaseModel):
     node_id: str
     agent_id: str
@@ -101,6 +107,9 @@ class MemoryNode(BaseModel):
     quality_scores: dict[str, float] = Field(default_factory=dict)
     token_count: int = 0
     source_hash: str = ""
+    source_type: str | None = None
+    source_id: str | None = None
+    event_id: str | None = None
     created_by: CreatedBy = CreatedBy.SYSTEM
     prompt_version: str | None = None
     model_version: str | None = None
@@ -120,6 +129,40 @@ class IngestMemoryRequest(BaseModel):
     node_type: NodeType = NodeType.EPISODE
     entities: list[str] = Field(default_factory=list)
     topics: list[str] = Field(default_factory=list)
+    source_type: str | None = None
+    source_id: str | None = None
+    event_id: str | None = None
+    allow_duplicate: bool = False
+
+
+class IngestMemoryRecord(BaseModel):
+    text: str
+    timestamp: datetime
+    importance_score: float = 0.5
+    node_type: NodeType = NodeType.EPISODE
+    entities: list[str] = Field(default_factory=list)
+    topics: list[str] = Field(default_factory=list)
+    source_type: str | None = None
+    source_id: str | None = None
+    event_id: str | None = None
+    allow_duplicate: bool = False
+
+
+class BatchIngestMemoriesRequest(BaseModel):
+    agent_id: str
+    records: list[IngestMemoryRecord] = Field(default_factory=list)
+    sort_by_timestamp: bool = True
+    build_summaries_after_ingest: bool = False
+
+
+class BatchIngestMemoriesResponse(BaseModel):
+    agent_id: str
+    received_count: int
+    ingested_count: int
+    duplicate_count: int
+    built_summary_count: int = 0
+    node_ids: list[str] = Field(default_factory=list)
+    duplicates: list[str] = Field(default_factory=list)
 
 
 class RetrieveRequest(BaseModel):
@@ -215,6 +258,76 @@ class EvalRequest(BaseModel):
     agent_id: str = "benchmark-agent"
 
 
+class CounterfactualOperation(BaseModel):
+    op: Literal["replace_event_text", "remove_event", "insert_event_after_day", "change_importance"]
+    match_text: str | None = None
+    new_text: str | None = None
+    after_day_offset: int | None = None
+    text: str | None = None
+    importance_score: float | None = None
+
+
+class CounterfactualVariantRequest(BaseModel):
+    variant_id: str
+    description: str = ""
+    operations: list[CounterfactualOperation] = Field(default_factory=list)
+
+
+class CounterfactualSnapshot(BaseModel):
+    retrieval_depth: int
+    retrieved_token_count: int
+    packed_token_count: int
+    branch_count: int
+    summary_count: int
+    retrieved_signatures: list[str] = Field(default_factory=list)
+    packed_context: str = ""
+    answer_text: str = ""
+    answer_confidence: float = 0.0
+
+
+class CounterfactualDiff(BaseModel):
+    answer_changed: bool = False
+    retrieval_depth_delta: int = 0
+    retrieved_token_delta: int = 0
+    packed_token_delta: int = 0
+    branch_count_delta: int = 0
+    summary_count_delta: int = 0
+    added_retrieved_signatures: list[str] = Field(default_factory=list)
+    removed_retrieved_signatures: list[str] = Field(default_factory=list)
+
+
+class CounterfactualVariantResult(BaseModel):
+    variant_id: str
+    description: str = ""
+    operations: list[CounterfactualOperation] = Field(default_factory=list)
+    snapshot: CounterfactualSnapshot
+    diff: CounterfactualDiff
+
+
+class CounterfactualReplayRequest(BaseModel):
+    scenario_name: str
+    seed: int | None = None
+    variants: list[CounterfactualVariantRequest] = Field(default_factory=list)
+    query_override: str | None = None
+    token_budget: int = 120
+    mode: QueryMode = QueryMode.BALANCED
+    branch_limit: int = 3
+    generate_answer: bool = True
+
+
+class CounterfactualReplayResponse(BaseModel):
+    report_type: str = "counterfactual_replay_report"
+    scenario_name: str
+    seed: int | None = None
+    query: str
+    mode: QueryMode
+    token_budget: int
+    branch_limit: int
+    base: CounterfactualSnapshot
+    variants: list[CounterfactualVariantResult] = Field(default_factory=list)
+    markdown: str = ""
+
+
 class EvalMetric(BaseModel):
     name: str
     value: float
@@ -259,6 +372,25 @@ class NodeProvenance(BaseModel):
 class TimelineResponse(BaseModel):
     agent_id: str
     nodes: list[MemoryNode]
+
+
+class SocialStateItem(BaseModel):
+    text: str
+    support_node_ids: list[str] = Field(default_factory=list)
+    entity: str | None = None
+    label: str | None = None
+    confidence: float | None = None
+
+
+class SocialStateDigestResponse(BaseModel):
+    agent_id: str
+    snapshot_at: datetime | None = None
+    active_commitments: list[SocialStateItem] = Field(default_factory=list)
+    active_revisions: list[SocialStateItem] = Field(default_factory=list)
+    relationship_guidance: list[SocialStateItem] = Field(default_factory=list)
+    open_tensions: list[SocialStateItem] = Field(default_factory=list)
+    likely_next_actions: list[SocialStateItem] = Field(default_factory=list)
+    stale_summary_count: int = 0
 
 
 class TreeNode(BaseModel):

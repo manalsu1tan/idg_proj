@@ -2,6 +2,7 @@ const state = {
   agentId: "demo-agent-stakeholder-handoff",
   selectedNodeId: null,
   demoQueryPresets: [],
+  socialStateExpanded: false,
 };
 const DEFAULT_DEMO_SCENARIO_NAME = "stakeholder_handoff_demo_v1";
 const DEFAULT_DEMO_QUERY_PRESETS = [
@@ -40,6 +41,9 @@ const treeViewEl = document.getElementById("tree-view");
 const nodeDetailEl = document.getElementById("node-detail");
 const answerResultEl = document.getElementById("answer-result");
 const retrievalResultEl = document.getElementById("retrieval-result");
+const socialStatePreviewEl = document.getElementById("social-state-preview");
+const socialStateEl = document.getElementById("social-state");
+const toggleSocialStateButtonEl = document.getElementById("toggle-social-state");
 const retrievalTracesEl = document.getElementById("retrieval-traces");
 const modelTracesEl = document.getElementById("model-traces");
 const evalRunsEl = document.getElementById("eval-runs");
@@ -376,6 +380,99 @@ function renderAnswerResult(result) {
   `;
 }
 
+function renderSocialStateSection(title, items, emptyMessage) {
+  return `
+    <div class="social-state-section">
+      <h3>${title}</h3>
+      ${
+        items?.length
+          ? items
+              .map(
+                (item) => `
+                  <article class="social-state-card">
+                    <div class="timeline-meta">
+                      ${item.entity ? badge(item.entity) : ""}
+                      ${item.label ? badge(item.label) : ""}
+                      ${item.support_node_ids?.length ? badge(`${item.support_node_ids.length} supports`) : ""}
+                    </div>
+                    <p>${escapeHtml(item.text || "")}</p>
+                  </article>
+                `,
+              )
+              .join("")
+          : `<div class="empty-state compact-empty-state">${emptyMessage}</div>`
+      }
+    </div>
+  `;
+}
+
+function socialStateCount(label, items) {
+  const count = Array.isArray(items) ? items.length : 0;
+  return `${count} ${label}${count === 1 ? "" : "s"}`;
+}
+
+function renderSocialStatePreview(digest) {
+  if (!socialStatePreviewEl) {
+    return;
+  }
+  if (!digest) {
+    socialStatePreviewEl.classList.add("empty-state");
+    socialStatePreviewEl.innerHTML = "No social-state digest available.";
+    return;
+  }
+  socialStatePreviewEl.classList.remove("empty-state");
+  socialStatePreviewEl.innerHTML = `
+    <div class="social-state-preview-copy">
+      ${socialStateCount("commitment", digest.active_commitments)}
+      <span aria-hidden="true">•</span>
+      ${socialStateCount("revision", digest.active_revisions)}
+      <span aria-hidden="true">•</span>
+      ${socialStateCount("guidance item", digest.relationship_guidance)}
+      <span aria-hidden="true">•</span>
+      ${socialStateCount("tension", digest.open_tensions)}
+      <span aria-hidden="true">•</span>
+      ${socialStateCount("next action", digest.likely_next_actions)}
+      <span aria-hidden="true">•</span>
+      stale summaries ${digest.stale_summary_count ?? 0}
+    </div>
+  `;
+}
+
+function setSocialStateExpanded(expanded) {
+  state.socialStateExpanded = expanded;
+  socialStateEl.classList.toggle("is-collapsed", !expanded);
+  socialStatePreviewEl?.classList.toggle("is-hidden", expanded);
+  if (toggleSocialStateButtonEl) {
+    toggleSocialStateButtonEl.textContent = expanded ? "Hide digest" : "Open digest";
+    toggleSocialStateButtonEl.setAttribute("aria-expanded", expanded ? "true" : "false");
+  }
+}
+
+function renderSocialState(digest) {
+  if (!digest) {
+    renderSocialStatePreview(null);
+    socialStateEl.classList.add("empty-state");
+    socialStateEl.innerHTML = `<div class="empty-state">No social-state digest available.</div>`;
+    return;
+  }
+  renderSocialStatePreview(digest);
+  socialStateEl.classList.remove("empty-state");
+  socialStateEl.innerHTML = `
+    <div class="detail-card social-state-summary">
+      <div class="timeline-meta">
+        ${badge(`stale summaries ${digest.stale_summary_count ?? 0}`)}
+        ${digest.snapshot_at ? badge(`snapshot ${new Date(digest.snapshot_at).toLocaleString()}`) : ""}
+      </div>
+      <p class="muted">Derived from active non-stale memories with provenance retained on each item.</p>
+    </div>
+    ${renderSocialStateSection("Active Commitments", digest.active_commitments, "No active commitments surfaced.")}
+    ${renderSocialStateSection("Active Revisions", digest.active_revisions, "No major revisions surfaced.")}
+    ${renderSocialStateSection("Relationship Guidance", digest.relationship_guidance, "No relationship guidance surfaced.")}
+    ${renderSocialStateSection("Open Tensions", digest.open_tensions, "No tensions or risks surfaced.")}
+    ${renderSocialStateSection("Likely Next Actions", digest.likely_next_actions, "No likely next actions surfaced.")}
+  `;
+}
+
 function renderRetrievalTraces(traces) {
   const distinctTraces = latestDistinct(traces, (trace) => trace.query);
   retrievalTracesEl.innerHTML = distinctTraces.length
@@ -435,7 +532,7 @@ function renderModelTraces(traces) {
               <strong>${trace.model_name}</strong>
               <p class="muted">${new Date(trace.created_at).toLocaleString()}</p>
               <p class="muted">Prompt version: ${trace.prompt_version || "n/a"}</p>
-              <p class="muted">Node: ${trace.node_id ? trace.node_id.slice(0, 8) : "n/a"}</p>
+              ${trace.node_id ? `<p class="muted">Node: ${trace.node_id.slice(0, 8)}</p>` : ""}
               <details>
                 <summary>Inspect request and response</summary>
                 <p class="trace-section-label">Request</p>
@@ -489,6 +586,11 @@ async function loadTimeline() {
 async function loadTree() {
   const tree = await fetchJson(`/v1/agents/${encodeURIComponent(state.agentId)}/tree`);
   renderTree(tree);
+}
+
+async function loadSocialState() {
+  const digest = await fetchJson(`/v1/agents/${encodeURIComponent(state.agentId)}/social-state`);
+  renderSocialState(digest);
 }
 
 async function loadTraces() {
@@ -588,7 +690,7 @@ async function loadAgent(agentId) {
   beginButtonBusy(loadAgentButtonEl, "Loading agent...");
   setActionStatus("Loading agent data...", "running");
   try {
-    await Promise.all([loadTimeline(), loadTree(), loadTraces(), loadEvalRuns()]);
+    await Promise.all([loadTimeline(), loadTree(), loadSocialState(), loadTraces(), loadEvalRuns()]);
     answerResultEl.innerHTML = `<div class="empty-state">Run a retrieval to generate a grounded answer.</div>`;
     retrievalResultEl.innerHTML = `<div class="empty-state">Run a retrieval to inspect packed context and branch choices.</div>`;
     nodeDetailEl.innerHTML = `<div class="empty-state">Select a timeline item to inspect provenance and children.</div>`;
@@ -671,5 +773,11 @@ document.getElementById("retrieve-form").addEventListener("submit", runRetrieval
 document.getElementById("run-evals").addEventListener("click", runEvals);
 document.getElementById("build-summaries").addEventListener("click", buildSummaries);
 document.getElementById("seed-complex-demo").addEventListener("click", seedComplexDemo);
+if (toggleSocialStateButtonEl) {
+  toggleSocialStateButtonEl.addEventListener("click", () => {
+    setSocialStateExpanded(!state.socialStateExpanded);
+  });
+}
 applyDemoConfig({ agent_id: state.agentId, query_presets: DEFAULT_DEMO_QUERY_PRESETS, query: DEFAULT_DEMO_QUERY_PRESETS[0].query });
+setSocialStateExpanded(false);
 initializeDemo();

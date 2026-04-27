@@ -36,6 +36,7 @@ REPORTS_DIR = Path(__file__).resolve().parents[2] / "reports"
 
 
 def _metrics_from_response(mode: AblationMode, response: RetrieveResponse, summary_count: int) -> AblationModeResult:
+    """Build baseline retrieval metrics for one mode"""
     metrics = [
         metric("retrieval_depth", float(response.retrieval_depth)),
         metric("token_budget", float(response.token_budget)),
@@ -56,6 +57,7 @@ def _append_recall_metrics(
     expected_keywords: list[str],
     expected_slots: dict[str, list[str]],
 ) -> AblationModeResult:
+    """Attach recall metrics to a mode result"""
     recall = keyword_recall(response.packed_context, expected_keywords)
     slot_score, slot_map = slot_recall(response.packed_context, expected_slots)
     recall_per_token = recall / max(float(response.diagnostics.retrieved_token_count), 1.0)
@@ -73,6 +75,7 @@ def _append_recall_metrics(
 
 
 def _top_leaf_only_response(service: MemoryService, *, agent_id: str, query: str, query_time: datetime, token_budget: int) -> RetrieveResponse:
+    """Force retrieval to a single best leaf"""
     retrieved, depth, trace_entries, routing_attribution = service.hierarchical_retriever.retrieve(
         agent_id=agent_id,
         query=query,
@@ -85,6 +88,7 @@ def _top_leaf_only_response(service: MemoryService, *, agent_id: str, query: str
     selected = leaf_candidates[:1] if leaf_candidates else retrieved[:1]
     selected_ids = {candidate.node.node_id for candidate in selected}
     selected_entries = [entry for entry in trace_entries if entry.node_id in selected_ids]
+    # Repack the reduced selection so diagnostics match the ablation mode
     packed = service.context_packer.pack(query, selected, token_budget)
     diagnostics = build_retrieval_diagnostics(selected, selected_entries, packed, routing_attribution=routing_attribution)
     trace = RetrievalTrace(
@@ -125,6 +129,7 @@ def _top_leaf_only_response(service: MemoryService, *, agent_id: str, query: str
 
 
 def _best_mode(mode_results: list[AblationModeResult]) -> AblationMode:
+    """Select the best mode for one scenario"""
     def score_tuple(result: AblationModeResult) -> tuple[float, float, float]:
         metric_map = {item.name: item.value for item in result.metrics}
         return (
@@ -138,6 +143,7 @@ def _best_mode(mode_results: list[AblationModeResult]) -> AblationMode:
 
 
 def run_ablation_scenario(service: MemoryService, scenario_name: str) -> AblationRunResult:
+    """Run all ablation modes for one scenario"""
     scenario = get_scenario(scenario_name)
     for event in scenario.events:
         service.agent_loop.observe(
@@ -164,6 +170,7 @@ def run_ablation_scenario(service: MemoryService, scenario_name: str) -> Ablatio
         "token_budget": 120,
     }
 
+    # Keep all retrieval modes side by side for a direct comparison
     runners: dict[AblationMode, Callable[[], RetrieveResponse]] = {
         AblationMode.FLAT_BASELINE: lambda: service.retrieve_flat(branch_limit=1, **query_kwargs),
         AblationMode.HIERARCHY_SUMMARY_ONLY: lambda: service.retrieve(mode=QueryMode.SUMMARY_ONLY, branch_limit=3, **query_kwargs),
@@ -192,6 +199,7 @@ def run_ablation_scenario(service: MemoryService, scenario_name: str) -> Ablatio
 
 
 def run_all_ablations() -> list[AblationRunResult]:
+    """Run ablations across all benchmark scenarios"""
     results = []
     for scenario in all_scenarios():
         results.append(run_ablation_scenario(MemoryService(load_settings()), scenario.name))
@@ -199,6 +207,7 @@ def run_all_ablations() -> list[AblationRunResult]:
 
 
 def build_ablation_report(results: list[AblationRunResult]) -> dict:
+    """Build a report payload from ablation runs"""
     exported_at = datetime.now(timezone.utc).isoformat()
     rows = []
     winners: dict[str, int] = {mode.value: 0 for mode in AblationMode}
@@ -228,6 +237,7 @@ def build_ablation_report(results: list[AblationRunResult]) -> dict:
 
 
 def render_ablation_markdown(report: dict) -> str:
+    """Render ablation results as markdown"""
     lines = [
         "# Benchmark Ablation Report",
         "",
@@ -268,6 +278,7 @@ def render_ablation_markdown(report: dict) -> str:
 
 
 def export_ablation_report(results: list[AblationRunResult], output_dir: Path = REPORTS_DIR, stem: str | None = None) -> dict[str, Path]:
+    """Write ablation json and markdown artifacts"""
     report = build_ablation_report(results)
     output_dir.mkdir(parents=True, exist_ok=True)
     safe_stem = stem or f"benchmark_ablation_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
@@ -279,6 +290,7 @@ def export_ablation_report(results: list[AblationRunResult], output_dir: Path = 
 
 
 def main() -> None:
+    """Run the ablation cli"""
     parser = argparse.ArgumentParser(description="Run benchmark retrieval ablations.")
     parser.add_argument("--output-dir", default=str(REPORTS_DIR), help="Directory to write ablation report artifacts into.")
     parser.add_argument("--stem", default=None, help="Optional file stem for generated ablation report files.")

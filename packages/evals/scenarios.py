@@ -649,7 +649,7 @@ def paraphrase_query(query: str, style: str) -> str:
         if source in paraphrased:
             paraphrased = paraphrased.replace(source, target)
     if paraphrased == query:
-        # Ensure every style still yields a distinct surface form.
+        # Ensure every style still yields a distinct surface form
         prefix = {
             "concise": "Quickly:",
             "indirect": "Based on prior notes,",

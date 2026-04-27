@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inspector</title>
-    <link rel="stylesheet" href="/ui/assets/styles.css?v=20260418d" />
+    <link rel="stylesheet" href="/ui/assets/styles.css?v=20260419a" />
   </head>
   <body>
     <div class="page-shell">
@@ -35,6 +35,19 @@
           </div>
         </form>
       </header>
+
+      <section class="social-state-strip">
+        <section class="panel panel-social-state">
+          <div class="panel-header">
+            <h2>Social State Digest</h2>
+            <button id="toggle-social-state" type="button">Open digest</button>
+          </div>
+          <div id="social-state-preview" class="social-state-preview empty-state">
+            Load an agent to inspect current commitments, guidance, tensions, and likely next actions.
+          </div>
+          <div id="social-state" class="social-state-grid is-collapsed empty-state">Load an agent to inspect current commitments, guidance, tensions, and likely next actions.</div>
+        </section>
+      </section>
 
       <main class="dashboard">
         <section class="panel panel-timeline">
@@ -84,11 +97,11 @@
           <div class="panel-subheader">
             <h3>Answer</h3>
           </div>
-          <div id="answer-result" class="answer-result empty-state">Run a retrieval to generate a grounded answer.</div>
+          <div id="answer-result" class="answer-result">Run a retrieval to generate a grounded answer.</div>
           <div class="panel-subheader">
             <h3>Retrieved context</h3>
           </div>
-          <div id="retrieval-result" class="retrieval-result empty-state">Run a retrieval to inspect packed context and branch choices.</div>
+          <div id="retrieval-result" class="retrieval-result">Run a retrieval to inspect packed context and branch choices.</div>
         </section>
       </main>
 
@@ -117,6 +130,6 @@
       </section>
     </div>
 
-    <script src="/ui/assets/app.js?v=20260418d" type="module"></script>
+    <script src="/ui/assets/app.js?v=20260419a" type="module"></script>
   </body>
 </html>

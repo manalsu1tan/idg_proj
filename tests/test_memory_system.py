@@ -470,9 +470,17 @@ def test_retrieve_can_optionally_verify_generated_answer(memory_service: MemoryS
     assert response.answer is not None
     assert response.answer_verification is not None
     assert response.answer_verification.quality_status == QualityStatus.VERIFIED
-    components = {trace.component for trace in memory_service.model_traces(agent_id=agent_id)}
+    traces = memory_service.model_traces(agent_id=agent_id)
+    components = {trace.component for trace in traces}
     assert "answerer" in components
     assert "answer_verifier" in components
+    by_component = {trace.component: trace for trace in traces}
+    assert by_component["answerer"].node_id is not None
+    assert by_component["answerer"].node_id in response.answer.citations
+    assert by_component["answer_verifier"].node_id is not None
+    assert by_component["answer_verifier"].node_id in {
+        item.node.node_id for item in response.retrieved_nodes
+    }
 
 
 def test_negation_sensitive_agreement_query_adds_polarity_support(memory_service: MemoryService) -> None:

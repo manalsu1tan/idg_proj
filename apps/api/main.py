@@ -13,6 +13,7 @@ import uuid
 
 from apps.api.dependencies import get_service
 from packages.evals.ablation import build_ablation_report, render_ablation_markdown, run_all_ablations
+from packages.evals.counterfactual import run_counterfactual_replay
 from packages.evals.report import build_report_payload, render_markdown_report
 from packages.evals.runner import run_selected
 from packages.evals.scenarios import get_scenario, scenario_timestamp
@@ -20,7 +21,11 @@ from packages.memory_core.services import MemoryService
 from packages.memory_core.utils import extract_entities, pseudo_embedding, source_hash, token_count, unique_topics
 from packages.schemas.models import (
     AgentTreeResponse,
+    BatchIngestMemoriesRequest,
+    BatchIngestMemoriesResponse,
     BuildSummariesRequest,
+    CounterfactualReplayRequest,
+    CounterfactualReplayResponse,
     CreatedBy,
     EvalRequest,
     EvalRunResult,
@@ -35,6 +40,7 @@ from packages.schemas.models import (
     RetrievalTrace,
     RetrieveRequest,
     RetrieveResponse,
+    SocialStateDigestResponse,
     TimelineResponse,
 )
 
@@ -80,7 +86,7 @@ DEFAULT_DEMO_QUERY_PRESETS = [
 
 
 class NoCacheStaticFiles(StaticFiles):
-    """Static file handler that disables browser caching for rapid UI iteration."""
+    """Static file handler with no-cache headers"""
 
     def file_response(self, full_path, stat_result, scope, status_code: int = 200):
         response = super().file_response(full_path, stat_result, scope, status_code)
@@ -94,6 +100,7 @@ if UI_DIR.exists():
 
 
 class DemoSeedRequest(BaseModel):
+    """Request body for demo seeding"""
     scenario_name: str = DEFAULT_DEMO_SCENARIO_NAME
     force: bool = True
 
@@ -113,6 +120,7 @@ def _demo_l0_node(
     importance: float,
     node_type: NodeType = NodeType.EPISODE,
 ) -> MemoryNode:
+    """Build a seeded demo leaf node"""
     timestamp = timestamp.replace(tzinfo=None)
     return MemoryNode(
         node_id=str(uuid.uuid4()),
@@ -158,6 +166,7 @@ def _demo_summary_node(
     support_ids: list[str],
     parent_ids: list[str] | None = None,
 ) -> MemoryNode:
+    """Build a seeded demo summary node"""
     timestamp = timestamp.replace(tzinfo=None)
     return MemoryNode(
         node_id=str(uuid.uuid4()),
@@ -193,6 +202,7 @@ def _demo_summary_node(
 
 
 def _default_demo_payload(agent_id: str = DEFAULT_DEMO_AGENT_ID) -> dict[str, object]:
+    """Return default demo metadata"""
     return {
         "agent_id": agent_id,
         "scenario_name": DEFAULT_DEMO_SCENARIO_NAME,
@@ -202,9 +212,11 @@ def _default_demo_payload(agent_id: str = DEFAULT_DEMO_AGENT_ID) -> dict[str, ob
 
 
 def _seed_stakeholder_handoff_demo_graph(service: MemoryService, agent_id: str) -> dict[str, object]:
+    """Seed the default stakeholder handoff demo graph"""
     service.store.delete_agent_data(agent_id)
     t0 = datetime(2025, 2, 3, 9, 0, 0)
 
+    # Seed the raw timeline first so later summaries keep clear provenance
     l0_nodes = [
         _demo_l0_node(
             service=service,
@@ -473,7 +485,20 @@ def ingest_memory(request: IngestMemoryRequest, service: MemoryService = Depends
         node_type=request.node_type,
         entities=request.entities,
         topics=request.topics,
+        source_type=request.source_type,
+        source_id=request.source_id,
+        event_id=request.event_id,
+        allow_duplicate=request.allow_duplicate,
     )
+
+
+@app.post("/v1/memories/ingest/batch", response_model=BatchIngestMemoriesResponse)
+def ingest_memories_batch(
+    request: BatchIngestMemoriesRequest,
+    service: MemoryService = Depends(get_service),
+) -> BatchIngestMemoriesResponse:
+    """Ingest a batch of L0 memories with optional dedupe and summary building."""
+    return service.ingest_batch(request)
 
 
 @app.post("/v1/memories/retrieve", response_model=RetrieveResponse)
@@ -525,6 +550,18 @@ def run_evals(_: EvalRequest, service: MemoryService = Depends(get_service)) -> 
     Uses quick scenario set for fast UI turnaround"""
     del service
     return run_selected(quick=True)
+
+
+@app.post("/v1/evals/counterfactual/run", response_model=CounterfactualReplayResponse)
+def run_counterfactual_eval(
+    request: CounterfactualReplayRequest,
+    service: MemoryService = Depends(get_service),
+) -> CounterfactualReplayResponse:
+    """Run counterfactual replay against a base scenario and one or more variants."""
+    return run_counterfactual_replay(
+        request,
+        service_factory=lambda: MemoryService(service.settings),
+    )
 
 
 @app.post("/v1/evals/ablations/run")
@@ -594,6 +631,12 @@ def get_children(node_id: str, service: MemoryService = Depends(get_service)):
 def get_timeline(agent_id: str, service: MemoryService = Depends(get_service)) -> TimelineResponse:
     """Get timeline projection for agent"""
     return service.timeline(agent_id)
+
+
+@app.get("/v1/agents/{agent_id}/social-state", response_model=SocialStateDigestResponse)
+def get_social_state(agent_id: str, service: MemoryService = Depends(get_service)) -> SocialStateDigestResponse:
+    """Get derived social-state digest for an agent."""
+    return service.social_state(agent_id)
 
 
 @app.get("/v1/agents/{agent_id}/tree", response_model=AgentTreeResponse)

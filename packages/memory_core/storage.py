@@ -89,6 +89,9 @@ class NodeRecord(Base):
     quality_scores = Column(Text, default="{}")
     token_count = Column(Integer, default=0)
     source_hash = Column(String(128), default="")
+    source_type = Column(String(64), nullable=True, index=True)
+    source_id = Column(String(128), nullable=True, index=True)
+    event_id = Column(String(128), nullable=True, index=True)
     created_by = Column(String(32), default=CreatedBy.SYSTEM.value)
     prompt_version = Column(String(64), nullable=True)
     model_version = Column(String(64), nullable=True)
@@ -189,8 +192,16 @@ class MemoryStore:
         node_type: NodeType,
         entities: list[str] | None = None,
         topics: list[str] | None = None,
+        source_type: str | None = None,
+        source_id: str | None = None,
+        event_id: str | None = None,
+        allow_duplicate: bool = False,
     ) -> MemoryNode:
         timestamp = normalize_datetime(timestamp)
+        if event_id and not allow_duplicate:
+            existing = self.find_existing_l0_by_event_id(agent_id=agent_id, event_id=event_id)
+            if existing is not None:
+                return existing
         node = MemoryNode(
             node_id=str(uuid.uuid4()),
             agent_id=agent_id,
@@ -217,7 +228,10 @@ class MemoryStore:
             quality_status=QualityStatus.VERIFIED if node_type != NodeType.SUMMARY else QualityStatus.PENDING,
             quality_scores={},
             token_count=token_count(text),
-            source_hash=source_hash([text, timestamp.isoformat()]),
+            source_hash=source_hash([text, timestamp.isoformat(), source_type or "", source_id or "", event_id or ""]),
+            source_type=source_type,
+            source_id=source_id,
+            event_id=event_id,
             created_by=CreatedBy.AGENT,
             prompt_version=self.prompt_version,
             model_version=self.model_version,
@@ -262,6 +276,9 @@ class MemoryStore:
             record.quality_scores = json.dumps(node.quality_scores)
             record.token_count = node.token_count
             record.source_hash = node.source_hash
+            record.source_type = node.source_type
+            record.source_id = node.source_id
+            record.event_id = node.event_id
             record.created_by = node.created_by.value
             record.prompt_version = node.prompt_version
             record.model_version = node.model_version
@@ -355,6 +372,21 @@ class MemoryStore:
             if node.source_hash == support_hash:
                 return node
         return None
+
+    def find_existing_l0_by_event_id(self, agent_id: str, event_id: str) -> MemoryNode | None:
+        with self.db.session() as session:
+            stmt = (
+                select(NodeRecord)
+                .where(
+                    NodeRecord.agent_id == agent_id,
+                    NodeRecord.level == MemoryLevel.L0.value,
+                    NodeRecord.event_id == event_id,
+                )
+                .order_by(NodeRecord.timestamp_start.asc())
+                .limit(1)
+            )
+            record = session.execute(stmt).scalars().first()
+            return self._to_node(record) if record is not None else None
 
     def parent_nodes(self, child_ids: list[str]) -> list[MemoryNode]:
         if not child_ids:
@@ -573,6 +605,9 @@ class MemoryStore:
             quality_scores=json.loads(record.quality_scores),
             token_count=record.token_count,
             source_hash=record.source_hash,
+            source_type=record.source_type,
+            source_id=record.source_id,
+            event_id=record.event_id,
             created_by=CreatedBy(record.created_by),
             prompt_version=record.prompt_version,
             model_version=record.model_version,

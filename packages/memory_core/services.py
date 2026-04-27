@@ -18,6 +18,7 @@ from packages.memory_core.model_components import (
     ModelBackedVerifier,
     build_model_client,
 )
+from packages.memory_core.social_state import build_social_state_digest
 from packages.memory_core.retrieval.hierarchical import HierarchicalRetriever
 from packages.memory_core.retrieval.diagnostics import (
     build_retrieval_diagnostics,
@@ -29,6 +30,7 @@ from packages.memory_core.storage import Database, MemoryStore
 from packages.memory_core.utils import (
     extract_entities,
     jaccard_similarity,
+    normalize_datetime,
     normalize_importance,
     pseudo_embedding,
     recency_score,
@@ -39,6 +41,8 @@ from packages.memory_core.utils import (
 )
 from packages.schemas.models import (
     AgentTreeResponse,
+    BatchIngestMemoriesRequest,
+    BatchIngestMemoriesResponse,
     BuildSummariesRequest,
     CreatedBy,
     EvalRunResult,
@@ -54,12 +58,14 @@ from packages.schemas.models import (
     RetrieveResponse,
     RetrievedNode,
     RetrievalMetadata,
+    SocialStateDigestResponse,
     TimelineResponse,
     dump_model,
 )
 
 
 logger = logging.getLogger(__name__)
+
 
 class RefreshPolicy:
     """Marks affected summary parents as stale
@@ -133,7 +139,7 @@ class TreeBuilder:
 
     def build_level(self, request: BuildSummariesRequest) -> list[MemoryNode]:
         """Build one summary level from source leaves"""
-        # current scope is L0 to L1 only
+        # Keep the MVP summary builder on one hop for predictable provenance
         if request.source_level != MemoryLevel.L0 or request.target_level != MemoryLevel.L1:
             raise ValueError("The MVP only supports L0 to L1 summary construction.")
         nodes = self.store.list_nodes(agent_id=request.agent_id, level=request.source_level)
@@ -152,6 +158,7 @@ class TreeBuilder:
                 built.append(existing)
                 continue
             summary_result, summary_trace = self.summarizer.generate(request.agent_id, cluster)
+            # Create the summary node before verification so traces can point at a stable id
             summary_node = MemoryNode(
                 node_id=str(uuid.uuid4()),
                 agent_id=request.agent_id,
@@ -194,6 +201,7 @@ class TreeBuilder:
             if summary_node.quality_status == QualityStatus.CONTRADICTED:
                 continue
             self.store.upsert_node(summary_node)
+            # Backfill parent links so retrieval can walk the tree upward
             for child in cluster:
                 if summary_node.node_id not in child.parent_ids:
                     child.parent_ids.append(summary_node.node_id)
@@ -202,6 +210,7 @@ class TreeBuilder:
         return built
 
     def _should_summarize_cluster(self, cluster: list[MemoryNode]) -> bool:
+        """Decide whether a cluster deserves a summary"""
         if len(cluster) >= 2:
             return True
         if not cluster:
@@ -210,6 +219,7 @@ class TreeBuilder:
         return node.importance_score >= 0.85 or self._contains_revision_signal(node.text)
 
     def _contains_revision_signal(self, text: str) -> bool:
+        """Detect update language that merits summarization"""
         lowered = text.lower()
         return any(
             token in lowered
@@ -217,6 +227,7 @@ class TreeBuilder:
         )
 
     def _contains_social_thread_signal(self, text: str) -> bool:
+        """Detect interpersonal thread language"""
         lowered = text.lower()
         return any(
             token in lowered
@@ -247,10 +258,12 @@ class TreeBuilder:
         )
 
     def _meaningful_cluster_entities(self, node: MemoryNode) -> set[str]:
+        """Filter noisy entities from clustering"""
         stop_entities = {"follow", "day", "morning", "afternoon", "evening", "routine"}
         return {entity.lower() for entity in node.entities if entity and entity.lower() not in stop_entities}
 
     def _can_extend_social_thread_cluster(self, cluster: list[MemoryNode], node: MemoryNode) -> bool:
+        """Allow social clusters to absorb closely related nodes"""
         if not cluster:
             return False
         node_entities = self._meaningful_cluster_entities(node)
@@ -407,6 +420,59 @@ class MemoryService:
         """Build summaries for an agent"""
         return self.tree_builder.build_level(request)
 
+    def ingest_batch(self, request: BatchIngestMemoriesRequest) -> BatchIngestMemoriesResponse:
+        """Ingest multiple L0 memories with optional dedupe and summary build."""
+        records = list(request.records)
+        if request.sort_by_timestamp:
+            records.sort(key=lambda item: normalize_datetime(item.timestamp))
+
+        ingested_nodes: list[MemoryNode] = []
+        duplicate_event_ids: list[str] = []
+        latest_timestamp: datetime | None = None
+        for record in records:
+            normalized_timestamp = normalize_datetime(record.timestamp)
+            latest_timestamp = normalized_timestamp if latest_timestamp is None else max(latest_timestamp, normalized_timestamp)
+            if record.event_id and not record.allow_duplicate:
+                existing = self.store.find_existing_l0_by_event_id(request.agent_id, record.event_id)
+                if existing is not None:
+                    duplicate_event_ids.append(record.event_id)
+                    continue
+            node = self.store.write_l0(
+                agent_id=request.agent_id,
+                text=record.text,
+                timestamp=record.timestamp,
+                importance_score=record.importance_score,
+                node_type=record.node_type,
+                entities=record.entities,
+                topics=record.topics,
+                source_type=record.source_type,
+                source_id=record.source_id,
+                event_id=record.event_id,
+                allow_duplicate=record.allow_duplicate,
+            )
+            ingested_nodes.append(node)
+
+        built_summary_count = 0
+        if request.build_summaries_after_ingest and ingested_nodes:
+            built_summary_count = len(
+                self.build_summaries(
+                    BuildSummariesRequest(
+                        agent_id=request.agent_id,
+                        query_time=latest_timestamp or datetime.utcnow(),
+                    )
+                )
+            )
+
+        return BatchIngestMemoriesResponse(
+            agent_id=request.agent_id,
+            received_count=len(request.records),
+            ingested_count=len(ingested_nodes),
+            duplicate_count=len(duplicate_event_ids),
+            built_summary_count=built_summary_count,
+            node_ids=[node.node_id for node in ingested_nodes],
+            duplicates=duplicate_event_ids,
+        )
+
     def retrieve(
         self,
         agent_id: str,
@@ -558,6 +624,12 @@ class MemoryService:
 
     def agent_tree(self, agent_id: str) -> AgentTreeResponse:
         return self.store.agent_tree(agent_id)
+
+    def social_state(self, agent_id: str) -> SocialStateDigestResponse:
+        return build_social_state_digest(
+            agent_id=agent_id,
+            nodes=self.store.list_nodes(agent_id=agent_id, include_stale=True),
+        )
 
     def retrieval_traces(self, agent_id: str | None = None, limit: int = 20) -> list[RetrievalTrace]:
         return self.store.list_retrieval_traces(agent_id=agent_id, limit=limit)
