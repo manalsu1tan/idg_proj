@@ -14,7 +14,7 @@ The system keeps the familiar agent loop of `observe -> retrieve -> plan/react/r
 
 The final report is [m_report_final.pdf](/m_report_final.pdf)
 
-Demo GIF is ![Inspector demo](/demo.gif)
+Demo GIF is [demo.gif](/demo.gif)
 
 The repository combines an agent memory service, an inspection UI, and an evaluation harness.
 
