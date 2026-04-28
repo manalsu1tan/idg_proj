@@ -2,6 +2,8 @@
 
 A memory architecture for generative agents, testing whether a hierarchical, provenance preserving memory system supports better retrieval and more useful state abstraction than a flat episodic memory stream alone.
 
+![demo.gif](/demo.gif)
+
 The system keeps the familiar agent loop of `observe -> retrieve -> plan/react/reflect -> write back`, but replaces a flat memory log with a traceable L0/L1 hierarchy:
 
 - L0 nodes store timestamped episodic memories and metadata.
@@ -14,7 +16,7 @@ The system keeps the familiar agent loop of `observe -> retrieve -> plan/react/r
 
 The final report is [m_report_final.pdf](/m_report_final.pdf)
 
-Demo GIF is ![demo.gif](/demo.gif)
+
 
 The repository combines an agent memory service, an inspection UI, and an evaluation harness.
 
